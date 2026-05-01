@@ -18,6 +18,7 @@ const mockPrisma = {
     findUnique: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
+    updateMany: jest.fn(),
     deleteMany: jest.fn(),
   },
   $transaction: jest.fn(),
@@ -177,7 +178,15 @@ describe('Auth Service', () => {
       const tokenRecord = { id: 'token123', tokenHash: oldHash, userId: user.id, isUsed: false, user };
 
       mockPrisma.refreshToken.findUnique.mockResolvedValue(tokenRecord);
-      mockPrisma.$transaction.mockResolvedValue([{}, {}]);
+      mockPrisma.$transaction.mockImplementation(async (callback) => {
+        const mockTx = {
+          refreshToken: {
+            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+            create: jest.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(mockTx);
+      });
 
       const result = await refresh(mockRes, oldToken);
 
