@@ -15,18 +15,21 @@ const getRequiredMultilineEnv = (name) => {
 const JWT_PRIVATE_KEY = getRequiredMultilineEnv('JWT_PRIVATE_KEY');
 const JWT_PUBLIC_KEY = getRequiredMultilineEnv('JWT_PUBLIC_KEY');
 
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const COOKIE_SAME_SITE = IS_PRODUCTION ? 'none' : 'lax';
+
 const ACCESS_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
+  secure: IS_PRODUCTION,
+  sameSite: COOKIE_SAME_SITE,
   maxAge: 15 * 60 * 1000,
   path: '/',
 };
 
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
+  secure: IS_PRODUCTION,
+  sameSite: COOKIE_SAME_SITE,
   maxAge: 7 * 24 * 60 * 60 * 1000,
   path: '/api/auth/refresh',
 };
@@ -127,11 +130,13 @@ export const refresh = async (res, refreshToken) => {
   });
 
   if (!tokenRecord) {
+    clearCookies(res);
     throw new Unauthorized('Invalid refresh token');
   }
 
   if (tokenRecord.isUsed) {
     await prisma.refreshToken.deleteMany({ where: { userId: tokenRecord.userId } });
+    clearCookies(res);
     throw new Unauthorized('Token reuse detected');
   }
 
@@ -143,6 +148,7 @@ export const refresh = async (res, refreshToken) => {
   }
 
   if (decoded.sub !== tokenRecord.userId) {
+    clearCookies(res);
     throw new Unauthorized('Invalid refresh token');
   }
 
@@ -151,7 +157,7 @@ export const refresh = async (res, refreshToken) => {
   const { token: newRefreshToken } = generateRefreshToken(user);
   const newTokenHash = hashToken(newRefreshToken);
 
-  const { count } = await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx) => {
     const result = await tx.refreshToken.updateMany({
       where: { id: tokenRecord.id, isUsed: false },
       data: { isUsed: true },
@@ -165,8 +171,6 @@ export const refresh = async (res, refreshToken) => {
     await tx.refreshToken.create({
       data: { tokenHash: newTokenHash, userId: user.id, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
     });
-
-    return result;
   });
 
   setCookies(res, newAccessToken, newRefreshToken);
