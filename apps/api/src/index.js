@@ -13,6 +13,7 @@ import { authLimiter, apiLimiter } from './middleware/rateLimiter.js';
 import authRoutes from './routes/auth.routes.js';
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 
 app.use(helmet({

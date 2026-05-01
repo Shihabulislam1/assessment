@@ -71,7 +71,7 @@ const clearCookies = (res) => {
 
 export const register = async (res, { email, password, name }) => {
   const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) throw new Unauthorized('Email already registered');
+  if (existing) throw new Conflict('Email already registered');
 
   const hashedPassword = await hashPassword(password);
   let user;
