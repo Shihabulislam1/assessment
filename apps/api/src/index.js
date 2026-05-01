@@ -7,13 +7,13 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { initSocket } from './socket/index.js';
 import { NotFound } from './utils/AppError.js';
+import corsConfig from './config/cors.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(helmet());
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
-app.use(cors({ origin: CLIENT_URL, credentials: true }));
+app.use(cors(corsConfig));
 app.use(cookieParser());
 app.use(express.json());
 app.use(morgan('dev'));
