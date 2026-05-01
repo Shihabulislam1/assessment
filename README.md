@@ -2,38 +2,12 @@
 
 > Real-time productivity hub with visual goal tracking, intelligent prioritization, and automated analytics.
 
-![Next.js](https://img.shields.io/badge/Next.js-15.4.5-black)
-![Express.js](https://img.shields.io/badge/Express.js-5.1.0-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue)
+![Next.js](https://img.shields.io/badge/Next.js-16.2.4-black)
+![Express.js](https://img.shields.io/badge/Express.js-5.0.0-blue)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-blue)
 ![Redis](https://img.shields.io/badge/Redis-7.4.0-red)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1.17-purple)
-![Recharts](https://img.shields.io/badge/Recharts-2.12.6-blue)
 ![Socket.IO](https://img.shields.io/badge/Socket.IO-4.8.1-yellow)
-![Vercel](https://img.shields.io/badge/Deployed-on-vercel)
-
----
-
-## 📋 Table of Contents
-
-- [🎯 Project Overview](#-project-overview)
-- [✨ Key Features](#-key-features)
-- [🏗️ Architecture](#-architecture)
-- [🚀 Getting Started](#-getting-started)
-- [📂 Project Structure](#-project-structure)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [📝 Database Schema](#-database-schema)
-- [🗄️ Prisma Setup](#️-prisma-setup)
-- [🗂️ API Documentation](#-api-documentation)
-- [📊 Analytics & Reporting](#-analytics--reporting)
-- [🔄 Real-time Sync](#-real-time-sync)
-- [🔒 Authentication](#-authentication)
-- [🎨 UI/UX Design](#-uiux-design)
-- [📡 Deployment](#-deployment)
-- [🧪 Testing](#-testing)
-- [📈 Performance](#-performance)
-- [🧩 Extensibility](#-extensibility)
-- [ troubleshooting](#-troubleshooting)
 
 ---
 
@@ -105,75 +79,20 @@ fredocloud/
 │   ├── web/        # Next.js frontend (React)
 │   └── api/        # Express.js backend (Node.js)
 ├── packages/
-│   └── shared/     # Shared code (constants, types, validators)
-├── prisma/         # Prisma schema (shared across apps)
-├── .github/        # GitHub Actions CI/CD pipelines
-├── .claude/        # Claude AI coding guidelines
+│   └── shared/      # Shared code (constants, validators)
 ├── README.md
-└── package.json
+├── package.json
+└── turbo.json
 ```
 
-### Component Diagram
+### Technical Stack
 
-```mermaid
-graph TD
-    User[User Browser] -->|HTTPS| Vercel[Vercel Edge Network]
-    
-    Vercel -->|Next.js| Edge[Edge Functions]
-    Edge -->|Server Actions| NextApp[Next.js Server]
-    NextApp -->|API Calls| Proxy[URL Proxy]
-    
-    Proxy -->|/api/| API[Express.js API]
-    API -->|Middleware| Auth[Auth Middleware]
-    API -->|Business Logic| Services[Services Layer]
-    
-    Services -->|Database| PG[PostgreSQL DB]
-    Services -->|Cache| Redis[Redis Cache]
-    Services -->|Storage| Cloudinary[Cloudinary Storage]
-    
-    API -->|WebSocket| Socket[Socket.IO Server]
-    Socket -->|WebSockets| User
-    
-    PG -->|Prisma| Client[Prisma Client]
-    Redis -->|ioredis| Client
-    Client -->|Shared| Packages[Shared Package]
-    
-    SubGraph0[Web Frontend]
-        User
-        Vercel
-        Edge
-        NextApp
-        Proxy
-    End
-    
-    SubGraph1[API Backend]
-        API
-        Auth
-        Services
-        Socket
-    End
-    
-    SubGraph2[Shared Infrastructure]
-        PG
-        Redis
-        Client
-        Packages
-        Cloudinary
-    End
-    
-    NextApp -.->|Shared Models| Packages
-    Auth -.->|Shared Models| Packages
-    Services -.->|Shared Models| Packages
-```
-
-### Technical Architecture
-
-- **Frontend**: Next.js with App Router, React, Recharts, Tailwind CSS
-- **Backend**: Express.js with TypeScript, Socket.IO, Prisma
+- **Frontend**: Next.js 16 with App Router, React 19, Tailwind CSS 4, Recharts
+- **Backend**: Express.js 5 with Socket.IO
 - **Database**: PostgreSQL (hosted on Railway)
 - **Cache**: Redis (hosted on Railway)
-- **Real-time**: Socket.IO with Redis adapter for multi-server support
-- **File Storage**: Cloudinary for image and document uploads
+- **Real-time**: Socket.IO
+- **File Storage**: Cloudinary
 - **Deployment**: Vercel (frontend), Railway (backend)
 
 ---
@@ -183,9 +102,9 @@ graph TD
 ### Prerequisites
 
 - **Node.js**: v20.x or higher
-- **PostgreSQL**: v15 or higher
-- **Redis**: v7 or higher
-- **npm** or **yarn**
+- **PostgreSQL**: v15 or higher (via Railway)
+- **Redis**: v7 or higher (via Railway)
+- **npm** v10+
 
 ### Installation
 
@@ -201,14 +120,111 @@ npm install
 ```
 
 3. **Configure environment variables**
-```bash
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.local.example apps/web/.env.local
+
+Create `apps/api/.env` with:
+```
+PORT=5000
+NODE_ENV=development
+DATABASE_URL=postgresql://postgres:password@localhost:5432/fredocloud
+JWT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----"
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLIENT_URL=http://localhost:3000
 ```
 
-Update the `.env` and `.env.local` files with your actual database credentials, API keys, and configuration.
-
-4. **Apply database migrations**
-```bash
-npm run db:migrate
+Create `apps/web/.env.local` with:
 ```
+NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
+```
+
+4. **Start development servers**
+```bash
+npm run dev
+```
+
+This starts both the Next.js frontend (http://localhost:3000) and Express.js API (http://localhost:5000).
+
+---
+
+## 📂 Project Structure
+
+```
+apps/
+├── web/                 # Next.js frontend
+│   ├── src/
+│   │   └── app/        # Next.js App Router pages
+│   ├── public/         # Static assets
+│   ├── next.config.mjs # Next.js configuration
+│   └── turbo.json      # Turborepo config
+│
+├── api/                 # Express.js backend
+│   ├── src/
+│   │   ├── routes/     # Express routes
+│   │   ├── middleware/  # Express middleware
+│   │   ├── controllers/# Request handlers
+│   │   ├── services/   # Business logic
+│   │   ├── utils/      # Utilities
+│   │   ├── config/     # Configuration
+│   │   └── socket/     # Socket.IO setup
+│   ├── prisma/         # Database schema (Phase 2)
+│   ├── package.json
+│   └── turbo.json      # Turborepo config
+│
+packages/
+└── shared/              # Shared code
+    ├── src/
+    │   └── constants.js # Shared constants
+    └── package.json
+```
+
+---
+
+## 🔄 Real-time Sync
+
+Socket.IO enables real-time bidirectional communication between the frontend and backend. The socket server is initialized alongside the Express HTTP server and handles:
+- Real-time notifications
+- Live updates for goals and tasks
+- Online presence tracking
+
+---
+
+## 🔒 Authentication
+
+JWT-based authentication with RS256 algorithm. Keys are configured via environment variables:
+- `JWT_PRIVATE_KEY` - For signing tokens
+- `JWT_PUBLIC_KEY` - For verifying tokens
+
+---
+
+## 📡 Deployment
+
+### Frontend (Vercel)
+- Connects to API via `NEXT_PUBLIC_API_URL` environment variable
+- API proxy configured in `next.config.mjs`
+
+### Backend (Railway)
+- PostgreSQL database provisioned via Railway
+- Redis cache provisioned via Railway
+- Environment variables injected at deploy time
+
+---
+
+## 🧪 Testing
+
+```bash
+npm run lint     # Lint all packages
+npm run build    # Build all packages
+```
+
+---
+
+## 🧩 Phases
+
+- **Phase 1**: Monorepo foundation, Next.js frontend, Express backend, Socket.IO
+- **Phase 2**: Prisma schema, PostgreSQL, Redis (planned)
+- **Phase 3**: Authentication & authorization (planned)
+- **Phase 4**: Goal & task management UI (planned)
+- **Phase 5**: Analytics & reporting (planned)
