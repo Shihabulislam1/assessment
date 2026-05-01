@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { Unauthorized } from '../utils/AppError.js';
+import { Unauthorized, Conflict } from '../utils/AppError.js';
 import prisma from '../config/db.js';
 
 const getRequiredMultilineEnv = (name) => {
@@ -74,9 +74,17 @@ export const register = async (res, { email, password, name }) => {
   if (existing) throw new Unauthorized('Email already registered');
 
   const hashedPassword = await hashPassword(password);
-  const user = await prisma.user.create({
-    data: { email, password: hashedPassword, name },
-  });
+  let user;
+  try {
+    user = await prisma.user.create({
+      data: { email, password: hashedPassword, name },
+    });
+  } catch (err) {
+    if (err.code === 'P2002') {
+      throw new Conflict('Email already registered');
+    }
+    throw err;
+  }
 
   const accessToken = generateAccessToken(user);
   const { token: refreshToken } = generateRefreshToken(user);

@@ -7,20 +7,28 @@ export const useAuthStore = create((set) => ({
 
   login: async (email, password) => {
     set({ isLoading: true });
-    const data = await apiFetch('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
-    set({ user: data.user, isLoading: false });
+    try {
+      const data = await apiFetch('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+      set({ user: data.user });
+    } finally {
+      set({ isLoading: false });
+    }
   },
 
   register: async (email, password, name) => {
     set({ isLoading: true });
-    const data = await apiFetch('/api/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, name }),
-    });
-    set({ user: data.user, isLoading: false });
+    try {
+      const data = await apiFetch('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, name }),
+      });
+      set({ user: data.user });
+    } finally {
+      set({ isLoading: false });
+    }
   },
 
   logout: async () => {
