@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import { Unauthorized } from '../utils/AppError.js';
 
 export const requireAuth = (req, res, next) => {
