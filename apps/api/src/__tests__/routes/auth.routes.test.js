@@ -2,23 +2,26 @@ import { jest } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 
+const mockRegister = jest.fn();
+const mockLogin = jest.fn();
+const mockRefresh = jest.fn();
+const mockLogout = jest.fn();
+const mockMe = jest.fn();
+
 jest.unstable_mockModule('../../controllers/auth.controller.js', () => ({
-  authController: {
-    register: jest.fn(),
-    login: jest.fn(),
-    refresh: jest.fn(),
-    logout: jest.fn(),
-    me: jest.fn(),
-  },
+  register: mockRegister,
+  login: mockLogin,
+  refresh: mockRefresh,
+  logout: mockLogout,
+  me: mockMe,
 }));
 
 jest.unstable_mockModule('../../middleware/auth.js', () => ({
   requireAuth: jest.fn((req, res, next) => next()),
 }));
 
-const { authController } = await import('../../controllers/auth.controller.js');
-const authRoutes = (await import('../../routes/auth.routes.js')).default;
 const { errorHandler } = await import('../../middleware/errorHandler.js');
+const authRoutes = (await import('../../routes/auth.routes.js')).default;
 
 describe('Auth Routes', () => {
   let app;
@@ -34,7 +37,7 @@ describe('Auth Routes', () => {
   describe('POST /api/auth/register', () => {
     it('returns 201 and user data for valid registration', async () => {
       const userData = { email: 'test@example.com', password: 'Password123!', name: 'Test User' };
-      authController.register.mockImplementation((req, res) => {
+      mockRegister.mockImplementation((req, res) => {
         res.status(201).json({ user: { id: 'user123', email: userData.email, name: userData.name } });
       });
 
@@ -86,7 +89,7 @@ describe('Auth Routes', () => {
 
   describe('POST /api/auth/login', () => {
     it('returns 200 and sets cookies for valid login', async () => {
-      authController.login.mockImplementation((req, res) => {
+      mockLogin.mockImplementation((req, res) => {
         res.status(200).json({ user: { id: 'user123', email: 'test@example.com' } });
       });
 
@@ -99,7 +102,7 @@ describe('Auth Routes', () => {
     });
 
     it('returns 401 for wrong password', async () => {
-      authController.login.mockImplementation(() => {
+      mockLogin.mockImplementation(() => {
         const err = new Error('Invalid credentials');
         err.statusCode = 401;
         throw err;
@@ -116,7 +119,7 @@ describe('Auth Routes', () => {
 
   describe('GET /api/auth/me', () => {
     it('returns 200 and user when authenticated', async () => {
-      authController.me.mockImplementation((req, res) => {
+      mockMe.mockImplementation((req, res) => {
         res.status(200).json({ user: { id: 'user123', email: 'test@example.com' } });
       });
 
@@ -129,7 +132,7 @@ describe('Auth Routes', () => {
 
   describe('POST /api/auth/logout', () => {
     it('returns 200 and clears cookies', async () => {
-      authController.logout.mockImplementation((req, res) => {
+      mockLogout.mockImplementation((req, res) => {
         res.status(200).json({ message: 'Logged out successfully' });
       });
 

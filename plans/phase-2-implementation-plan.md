@@ -49,7 +49,7 @@ git checkout -b feature/phase-2-auth-db
 
 **File:** `apps/api/prisma/schema.prisma`
 
-**Models (11 total):**
+**Models (13 total):**
 | Model | Relations | Indexes |
 |-------|-----------|---------|
 | User | WorkspaceMember[], Goal[], ActionItem[], Announcement[], Comment[], Reaction[], Activity[], AuditLog[], Notification[], RefreshToken[] | email (unique) |

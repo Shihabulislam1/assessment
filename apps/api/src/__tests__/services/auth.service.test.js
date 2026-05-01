@@ -203,7 +203,7 @@ describe('Auth Service', () => {
     it('throws error for invalid token', async () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValue(null);
 
-      await expect(refresh(mockRes, 'invalid-token')).rejects.toThrow('Token reuse detected');
+      await expect(refresh(mockRes, 'invalid-token')).rejects.toThrow('Invalid refresh token');
     });
   });
 

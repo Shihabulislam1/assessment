@@ -4,8 +4,16 @@ import crypto from 'crypto';
 import { Unauthorized } from '../utils/AppError.js';
 import prisma from '../config/db.js';
 
-const JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY.replace(/\\n/g, '\n');
-const JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY.replace(/\\n/g, '\n');
+const getRequiredMultilineEnv = (name) => {
+  const value = process.env[name];
+  if (typeof value !== 'string' || value.trim() === '') {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value.replace(/\\n/g, '\n');
+};
+
+const JWT_PRIVATE_KEY = getRequiredMultilineEnv('JWT_PRIVATE_KEY');
+const JWT_PUBLIC_KEY = getRequiredMultilineEnv('JWT_PUBLIC_KEY');
 
 const ACCESS_COOKIE_OPTIONS = {
   httpOnly: true,
@@ -71,7 +79,7 @@ export const register = async (res, { email, password, name }) => {
   });
 
   const accessToken = generateAccessToken(user);
-  const { token: refreshToken, jti } = generateRefreshToken(user);
+  const { token: refreshToken } = generateRefreshToken(user);
   const tokenHash = hashToken(refreshToken);
 
   await prisma.refreshToken.create({
@@ -90,7 +98,7 @@ export const login = async (res, { email, password }) => {
   if (!valid) throw new Unauthorized('Invalid credentials');
 
   const accessToken = generateAccessToken(user);
-  const { token: refreshToken, jti } = generateRefreshToken(user);
+  const { token: refreshToken } = generateRefreshToken(user);
   const tokenHash = hashToken(refreshToken);
 
   await prisma.refreshToken.create({
@@ -110,10 +118,12 @@ export const refresh = async (res, refreshToken) => {
     include: { user: true },
   });
 
-  if (!tokenRecord || tokenRecord.isUsed) {
-    if (tokenRecord?.userId) {
-      await prisma.refreshToken.deleteMany({ where: { userId: tokenRecord.userId } });
-    }
+  if (!tokenRecord) {
+    throw new Unauthorized('Invalid refresh token');
+  }
+
+  if (tokenRecord.isUsed) {
+    await prisma.refreshToken.deleteMany({ where: { userId: tokenRecord.userId } });
     throw new Unauthorized('Token reuse detected');
   }
 
@@ -124,20 +134,32 @@ export const refresh = async (res, refreshToken) => {
     throw new Unauthorized('Invalid or expired token');
   }
 
+  if (decoded.sub !== tokenRecord.userId) {
+    throw new Unauthorized('Invalid refresh token');
+  }
+
   const user = tokenRecord.user;
   const newAccessToken = generateAccessToken(user);
   const { token: newRefreshToken } = generateRefreshToken(user);
   const newTokenHash = hashToken(newRefreshToken);
 
-  await prisma.$transaction([
-    prisma.refreshToken.update({
-      where: { id: tokenRecord.id },
+  const { count } = await prisma.$transaction(async (tx) => {
+    const result = await tx.refreshToken.updateMany({
+      where: { id: tokenRecord.id, isUsed: false },
       data: { isUsed: true },
-    }),
-    prisma.refreshToken.create({
+    });
+
+    if (result.count !== 1) {
+      await tx.refreshToken.deleteMany({ where: { userId: tokenRecord.userId } });
+      throw new Unauthorized('Token reuse detected');
+    }
+
+    await tx.refreshToken.create({
       data: { tokenHash: newTokenHash, userId: user.id, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
-    }),
-  ]);
+    });
+
+    return result;
+  });
 
   setCookies(res, newAccessToken, newRefreshToken);
   return { user: { id: user.id, email: user.email, name: user.name } };
