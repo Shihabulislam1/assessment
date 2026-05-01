@@ -9,7 +9,7 @@ import { initSocket } from './socket/index.js';
 import { NotFound } from './utils/AppError.js';
 import corsConfig from './config/cors.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import { authLimiter, apiLimiter } from './middleware/rateLimiter.js';
+import { authLimiter, apiLimiter, refreshLimiter } from './middleware/rateLimiter.js';
 import authRoutes from './routes/auth.routes.js';
 
 const app = express();
@@ -33,6 +33,7 @@ app.use(morgan('dev'));
 
 app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/refresh', refreshLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/', apiLimiter);
 

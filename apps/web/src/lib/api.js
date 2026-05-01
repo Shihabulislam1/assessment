@@ -10,11 +10,24 @@ export async function apiFetch(path, options = {}) {
   if (hasBody && !isFormData && !hasContentType) {
     headers['Content-Type'] = 'application/json';
   }
+
+  const method = options.method || 'GET';
+  if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+    const csrfToken = getCsrfToken();
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
+  }
+
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     credentials: 'include',
     headers,
   });
+
+  if (res.status === 204 || res.headers.get('content-length') === '0') {
+    return null;
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -22,4 +35,10 @@ export async function apiFetch(path, options = {}) {
   }
 
   return res.json();
+}
+
+function getCsrfToken() {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
+  return match ? match[1] : null;
 }

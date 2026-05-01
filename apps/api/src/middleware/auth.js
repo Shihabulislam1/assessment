@@ -10,6 +10,8 @@ const getJwtPublicKey = () => {
 };
 
 const JWT_PUBLIC_KEY = getJwtPublicKey();
+const JWT_ISSUER = process.env.JWT_ISSUER || 'fredocloud';
+const JWT_AUDIENCE = process.env.JWT_AUDIENCE || 'fredocloud-api';
 
 export const requireAuth = (req, res, next) => {
   const token = req.cookies.access_token;
@@ -18,6 +20,8 @@ export const requireAuth = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, JWT_PUBLIC_KEY, {
       algorithms: ['RS256'],
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
     });
     req.user = { id: decoded.sub, email: decoded.email };
     next();

@@ -4,6 +4,8 @@ import crypto from 'crypto';
 import { Unauthorized, Conflict } from '../utils/AppError.js';
 import prisma from '../config/db.js';
 
+export const generateCsrfToken = () => crypto.randomBytes(32).toString('hex');
+
 const getRequiredMultilineEnv = (name) => {
   const value = process.env[name];
   if (typeof value !== 'string' || value.trim() === '') {
@@ -14,25 +16,8 @@ const getRequiredMultilineEnv = (name) => {
 
 const JWT_PRIVATE_KEY = getRequiredMultilineEnv('JWT_PRIVATE_KEY');
 const JWT_PUBLIC_KEY = getRequiredMultilineEnv('JWT_PUBLIC_KEY');
-
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const COOKIE_SAME_SITE = IS_PRODUCTION ? 'none' : 'lax';
-
-const ACCESS_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: IS_PRODUCTION,
-  sameSite: COOKIE_SAME_SITE,
-  maxAge: 15 * 60 * 1000,
-  path: '/',
-};
-
-const REFRESH_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: IS_PRODUCTION,
-  sameSite: COOKIE_SAME_SITE,
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-  path: '/api/auth/refresh',
-};
+const JWT_ISSUER = process.env.JWT_ISSUER || 'fredocloud';
+const JWT_AUDIENCE = process.env.JWT_AUDIENCE || 'fredocloud-api';
 
 export const hashPassword = async (password) => {
   return bcrypt.hash(password, 12);
@@ -43,18 +28,20 @@ export const verifyPassword = async (password, hash) => {
 };
 
 export const generateAccessToken = (user) => {
-  return jwt.sign({ sub: user.id, email: user.email }, JWT_PRIVATE_KEY, {
-    algorithm: 'RS256',
-    expiresIn: '15m',
-  });
+  return jwt.sign(
+    { sub: user.id, email: user.email },
+    JWT_PRIVATE_KEY,
+    { algorithm: 'RS256', expiresIn: '15m', issuer: JWT_ISSUER, audience: JWT_AUDIENCE }
+  );
 };
 
 export const generateRefreshToken = (user) => {
   const jti = crypto.randomBytes(16).toString('hex');
-  const token = jwt.sign({ sub: user.id, jti }, JWT_PRIVATE_KEY, {
-    algorithm: 'RS256',
-    expiresIn: '7d',
-  });
+  const token = jwt.sign(
+    { sub: user.id, jti },
+    JWT_PRIVATE_KEY,
+    { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE }
+  );
   return { token, jti };
 };
 
@@ -62,25 +49,16 @@ export const hashToken = (token) => {
   return crypto.createHash('sha256').update(token).digest('hex');
 };
 
-const setCookies = (res, accessToken, refreshToken) => {
-  res.cookie('access_token', accessToken, ACCESS_COOKIE_OPTIONS);
-  res.cookie('refresh_token', refreshToken, REFRESH_COOKIE_OPTIONS);
-};
-
-const clearCookies = (res) => {
-  res.clearCookie('access_token', { ...ACCESS_COOKIE_OPTIONS, maxAge: 0 });
-  res.clearCookie('refresh_token', { ...REFRESH_COOKIE_OPTIONS, maxAge: 0 });
-};
-
-export const register = async (res, { email, password, name }) => {
-  const existing = await prisma.user.findUnique({ where: { email } });
+export const register = async ({ email, password, name }) => {
+  const normalizedEmail = email.trim().toLowerCase();
+  const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
   if (existing) throw new Conflict('Email already registered');
 
   const hashedPassword = await hashPassword(password);
   let user;
   try {
     user = await prisma.user.create({
-      data: { email, password: hashedPassword, name },
+      data: { email: normalizedEmail, password: hashedPassword, name },
     });
   } catch (err) {
     if (err.code === 'P2002') {
@@ -92,17 +70,25 @@ export const register = async (res, { email, password, name }) => {
   const accessToken = generateAccessToken(user);
   const { token: refreshToken } = generateRefreshToken(user);
   const tokenHash = hashToken(refreshToken);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   await prisma.refreshToken.create({
-    data: { tokenHash, userId: user.id, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+    data: { tokenHash, userId: user.id, expiresAt },
   });
 
-  setCookies(res, accessToken, refreshToken);
-  return { user: { id: user.id, email: user.email, name: user.name } };
+  const csrfToken = generateCsrfToken();
+
+  return {
+    user: { id: user.id, email: user.email, name: user.name },
+    accessToken,
+    refreshToken,
+    csrfToken,
+  };
 };
 
-export const login = async (res, { email, password }) => {
-  const user = await prisma.user.findUnique({ where: { email } });
+export const login = async ({ email, password }) => {
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
   if (!user) throw new Unauthorized('Invalid credentials');
 
   const valid = await verifyPassword(password, user.password);
@@ -111,16 +97,23 @@ export const login = async (res, { email, password }) => {
   const accessToken = generateAccessToken(user);
   const { token: refreshToken } = generateRefreshToken(user);
   const tokenHash = hashToken(refreshToken);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   await prisma.refreshToken.create({
-    data: { tokenHash, userId: user.id, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+    data: { tokenHash, userId: user.id, expiresAt },
   });
 
-  setCookies(res, accessToken, refreshToken);
-  return { user: { id: user.id, email: user.email, name: user.name } };
+  const csrfToken = generateCsrfToken();
+
+  return {
+    user: { id: user.id, email: user.email, name: user.name },
+    accessToken,
+    refreshToken,
+    csrfToken,
+  };
 };
 
-export const refresh = async (res, refreshToken) => {
+export const refresh = async (refreshToken) => {
   if (!refreshToken) throw new Unauthorized('No refresh token');
 
   const tokenHash = hashToken(refreshToken);
@@ -130,25 +123,33 @@ export const refresh = async (res, refreshToken) => {
   });
 
   if (!tokenRecord) {
-    clearCookies(res);
     throw new Unauthorized('Invalid refresh token');
+  }
+
+  if (tokenRecord.expiresAt < new Date()) {
+    await prisma.refreshToken.delete({ where: { id: tokenRecord.id } });
+    throw new Unauthorized('Refresh token expired');
   }
 
   if (tokenRecord.isUsed) {
     await prisma.refreshToken.deleteMany({ where: { userId: tokenRecord.userId } });
-    clearCookies(res);
     throw new Unauthorized('Token reuse detected');
   }
 
   let decoded;
   try {
-    decoded = jwt.verify(refreshToken, JWT_PUBLIC_KEY, { algorithms: ['RS256'] });
+    decoded = jwt.verify(refreshToken, JWT_PUBLIC_KEY, {
+      algorithms: ['RS256'],
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
+    });
   } catch {
+    await prisma.refreshToken.delete({ where: { tokenHash } }).catch(() => {});
     throw new Unauthorized('Invalid or expired token');
   }
 
   if (decoded.sub !== tokenRecord.userId) {
-    clearCookies(res);
+    await prisma.refreshToken.deleteMany({ where: { userId: tokenRecord.userId } }).catch(() => {});
     throw new Unauthorized('Invalid refresh token');
   }
 
@@ -169,17 +170,24 @@ export const refresh = async (res, refreshToken) => {
     }
 
     await tx.refreshToken.create({
-      data: { tokenHash: newTokenHash, userId: user.id, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+      data: {
+        tokenHash: newTokenHash,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
     });
   });
 
-  setCookies(res, newAccessToken, newRefreshToken);
-  return { user: { id: user.id, email: user.email, name: user.name } };
+  return {
+    user: { id: user.id, email: user.email, name: user.name },
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
+    csrfToken: generateCsrfToken(),
+  };
 };
 
-export const logout = async (res, userId) => {
+export const logout = async (userId) => {
   await prisma.refreshToken.deleteMany({ where: { userId } });
-  clearCookies(res);
   return { message: 'Logged out successfully' };
 };
 

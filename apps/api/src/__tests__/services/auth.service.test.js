@@ -5,9 +5,13 @@ import crypto from 'crypto';
 
 process.env.JWT_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCyrbyo2DCTmeXz\n5jqioXEovBILBL/1llH/XIDPDx5fnbncInFfGwVMIo/sTo5arSLx9O5QStH6mQPn\n7iP/2GLXgi3iTByKqVEuqcTjD0iIMvFqeBLCTSLrfatJJ7HyZI7FZg2aF9Czq7m0\n73/MIEUj4HMCRpgFbir8H65b3xbAfSv4Qj9iaI+Yk6p4FwPRdT9mP79pabQnDBse\n4NvH6rHexS5OofdDS4wIZ9k7/cn40SB9yZ2stBUsvDtrtH+M8EhjnZav5Y4ad999\nox2kZiL4cKbA4K8gH33kJ2tibQ0T0kE7S8PBlA5DG9EtRmw7jUAPOatRJqrsBjze\nC6932fIjAgMBAAECggEAJQx7QvNY1zIhCTqiy9f3079zak940h5yMCXpG4YCAUd+\nI1QM9/BtX8UG3LPJNqoRxePIimOJOJIDylKJqmIe1JrMktC/Vk0XZTqUdZRUsNEH\nV9E/6oP+CqBLJOcTMbSCGhI4Hcx0XNztq8PBVv0V+QNwNXeXzAB070RObgRK/mxc\n/qN5at9Dounr/Wif0WvJ4ntclcftrkpLBzpNNEdmmSQVWZ+MdaO6I4fwYlofjwvt\nqJ9M1xMrj9idVdORQ90HsFBi0JNhPEXvVQ3MA0Y8rwR0z2p7elrESv67Yyd4R1Ag\nFEURdTa+c5YnFz22WyHkUNljQHcxoT2aNSDzE3i7GQKBgQDm3HvXZI5Z7+8Mf/js\nZrAcetl8dla7vxv5nA5cVSC15atezB9kj4kR9yb6ImPOGz3wjSPIa9G+M6l5bs4U\nSE6xdXNJwPg2RGdpKcT5xkb3uV5FDXfzTTMvrJ1GMN32sOJQFVMuJTzsPMAjhJVK\ndmtdrGNnlCZSDyFbLbWR0fi9FQKBgQDGIprLHVtW+y8aR65RGbusb/toInGlMOkU\nRsIP8xt22R5cPazTrG2JeP89IzzFdLpgoLwJA+v0UGM7yoIZ0eqZJZZlGqrFPUwr\ncZfGq8LSdFhe8+hUpaYeckJ04jtI0mrgWwSqSlTXRDHEp1bYZV7IF5AWmnYk5bme\njXGsTlbwVwKBgAgYTxdcZUluClnL2vSfHSnCfQHKPHxU1SxJdo9yRLVcGkg2rBsg\nlVPV8L3wmsNNXTykFk8eyLn8ocKqSfuYFXpPff1mEM4GVAHx/wArHa3uCAov0Lbt\nTBAt403kxMOzrBvWw5XopFw8PRiBu6JiyJz+QHYPUdCqyyahUa6NSEWJAoGARWPJ\nImldm9DMZj/EZNLGT1XIjmfBtUCz4E4HmN5jN/RCFbvj0x4IHqUpfpfgqKaAv2aL\nc/zTnfSpTD9X4QMLTidDzJTSSdF146Ecro9o45urd1WkgECjNPZ/H8A7Uv2eQISf\n1aPCosFXTK/uUkruLtVRuRjPV4y8vTJ8JQQqnnECgYEAqVLkYKeqdK49/BMTHl/z\nrBUM/oub0DQLQ4ppfV/lQHTSfS6QquFOqxn1HlF2INwHSx+IbJECGGPFhcrVJ6PO\nUqVDbuZMo/I12qRilvL1tHcKLlKMzgajXst2QodZs3LLo76qjBE8qrGQs+vp8IYH\n8M6ec7EREmR3RULKlMmS4yk=\n-----END PRIVATE KEY-----';
 process.env.JWT_PUBLIC_KEY = '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsq28qNgwk5nl8+Y6oqFx\nKLwSCwS/9ZZR/1yAzw8eX5253CJxXxsFTCKP7E6OWq0i8fTuUErR+pkD5+4j/9hi\n14It4kwciqlRLqnE4w9IiDLxangSwk0i632rSSex8mSOxWYNmhfQs6u5tO9/zCBF\nI+BzAkaYBW4q/B+uW98WwH0r+EI/YmiPmJOqeBcD0XU/Zj+/aWm0JwwbHuDbx+qx\n3sUuTqH3Q0uMCGfZO/3J+NEgfcmdrLQVLLw7a7R/jPBIY52Wr+WOGnfffaMdpGYi\n+HCmwOCvIB995CdrYm0NE9JBO0vDwZQOQxvRLUZsO41ADzmrUSaq7AY83guvd9ny\nIwIDAQAB\n-----END PUBLIC KEY-----';
+process.env.JWT_ISSUER = 'fredocloud';
+process.env.JWT_AUDIENCE = 'fredocloud-api';
 
 const JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY;
 const JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY;
+const JWT_ISSUER = process.env.JWT_ISSUER;
+const JWT_AUDIENCE = process.env.JWT_AUDIENCE;
 
 const mockPrisma = {
   user: {
@@ -19,6 +23,7 @@ const mockPrisma = {
     create: jest.fn(),
     update: jest.fn(),
     updateMany: jest.fn(),
+    delete: jest.fn(),
     deleteMany: jest.fn(),
   },
   $transaction: jest.fn(),
@@ -34,6 +39,7 @@ const {
   generateAccessToken,
   generateRefreshToken,
   hashToken,
+  generateCsrfToken,
   register,
   login,
   refresh,
@@ -42,11 +48,6 @@ const {
 } = await import('../../services/auth.service.js');
 
 describe('Auth Service', () => {
-  const mockRes = {
-    cookie: jest.fn(),
-    clearCookie: jest.fn(),
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -86,26 +87,36 @@ describe('Auth Service', () => {
   });
 
   describe('generateAccessToken', () => {
-    it('creates RS256 JWT with 15min expiry', () => {
+    it('creates RS256 JWT with 15min expiry and correct issuer/audience', () => {
       const user = { id: 'user123', email: 'test@example.com' };
       const token = generateAccessToken(user);
-      const decoded = jwt.verify(token, JWT_PUBLIC_KEY, { algorithms: ['RS256'] });
+      const decoded = jwt.verify(token, JWT_PUBLIC_KEY, { algorithms: ['RS256'], issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
       expect(decoded.sub).toBe(user.id);
       expect(decoded.email).toBe(user.email);
+      expect(decoded.iss).toBe(JWT_ISSUER);
+      expect(decoded.aud).toBe(JWT_AUDIENCE);
       const exp = decoded.exp - decoded.iat;
       expect(exp).toBe(15 * 60);
+    });
+
+    it('rejects token with wrong issuer', () => {
+      const user = { id: 'user123', email: 'test@example.com' };
+      const token = generateAccessToken(user);
+      expect(() => jwt.verify(token, JWT_PUBLIC_KEY, { algorithms: ['RS256'], issuer: 'wrong-issuer', audience: JWT_AUDIENCE })).toThrow();
     });
   });
 
   describe('generateRefreshToken', () => {
-    it('creates RS256 JWT with jti claim', () => {
+    it('creates RS256 JWT with jti claim and issuer/audience', () => {
       const user = { id: 'user123', email: 'test@example.com' };
       const { token, jti } = generateRefreshToken(user);
       expect(jti).toBeDefined();
       expect(jti.length).toBe(32);
-      const decoded = jwt.verify(token, JWT_PUBLIC_KEY, { algorithms: ['RS256'] });
+      const decoded = jwt.verify(token, JWT_PUBLIC_KEY, { algorithms: ['RS256'], issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
       expect(decoded.jti).toBe(jti);
       expect(decoded.sub).toBe(user.id);
+      expect(decoded.iss).toBe(JWT_ISSUER);
+      expect(decoded.aud).toBe(JWT_AUDIENCE);
     });
   });
 
@@ -117,31 +128,59 @@ describe('Auth Service', () => {
     });
   });
 
+  describe('generateCsrfToken', () => {
+    it('returns a 64-character hex string', () => {
+      const token = generateCsrfToken();
+      expect(token).toBeDefined();
+      expect(token.length).toBe(64);
+      expect(/^[a-f0-9]+$/.test(token)).toBe(true);
+    });
+
+    it('generates different tokens each call', () => {
+      const token1 = generateCsrfToken();
+      const token2 = generateCsrfToken();
+      expect(token1).not.toBe(token2);
+    });
+  });
+
   describe('register', () => {
-    it('creates user with hashed password', async () => {
+    it('creates user with hashed password and returns tokens + csrf', async () => {
       const userData = { email: 'new@example.com', password: 'Password123!', name: 'New User' };
       mockPrisma.user.findUnique.mockResolvedValue(null);
       mockPrisma.user.create.mockResolvedValue({ id: 'user123', ...userData, password: 'hashed' });
       mockPrisma.refreshToken.create.mockResolvedValue({});
 
-      const result = await register(mockRes, userData);
+      const result = await register(userData);
 
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { email: userData.email } });
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { email: 'new@example.com' } });
       expect(mockPrisma.user.create).toHaveBeenCalled();
       expect(mockPrisma.refreshToken.create).toHaveBeenCalled();
-      expect(mockRes.cookie).toHaveBeenCalledTimes(2);
+      expect(result.accessToken).toBeDefined();
+      expect(result.refreshToken).toBeDefined();
+      expect(result.csrfToken).toBeDefined();
       expect(result.user.email).toBe(userData.email);
+    });
+
+    it('normalizes email to lowercase', async () => {
+      const userData = { email: '  NEW@EXAMPLE.COM  ', password: 'Password123!', name: 'New User' };
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.create.mockResolvedValue({ id: 'user123', email: 'new@example.com', password: 'hashed', name: 'New User' });
+      mockPrisma.refreshToken.create.mockResolvedValue({});
+
+      await register(userData);
+
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { email: 'new@example.com' } });
     });
 
     it('throws error if email already exists', async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ id: 'existing', email: 'existing@example.com' });
-      await expect(register(mockRes, { email: 'existing@example.com', password: 'Pass123!', name: 'Test' }))
+      await expect(register({ email: 'existing@example.com', password: 'Pass123!', name: 'Test' }))
         .rejects.toThrow('Email already registered');
     });
   });
 
   describe('login', () => {
-    it('returns user on valid credentials', async () => {
+    it('returns user and tokens on valid credentials', async () => {
       const password = 'Password123!';
       const hashedPassword = await bcrypt.hash(password, 12);
       const user = { id: 'user123', email: 'test@example.com', name: 'Test User', password: hashedPassword };
@@ -149,15 +188,28 @@ describe('Auth Service', () => {
       mockPrisma.user.findUnique.mockResolvedValue(user);
       mockPrisma.refreshToken.create.mockResolvedValue({});
 
-      const result = await login(mockRes, { email: 'test@example.com', password });
+      const result = await login({ email: 'test@example.com', password });
 
       expect(result.user.email).toBe(user.email);
-      expect(mockRes.cookie).toHaveBeenCalledTimes(2);
+      expect(result.accessToken).toBeDefined();
+      expect(result.refreshToken).toBeDefined();
+      expect(result.csrfToken).toBeDefined();
+    });
+
+    it('normalizes email to lowercase', async () => {
+      const hashedPassword = await bcrypt.hash('Password123!', 12);
+      const user = { id: 'user123', email: 'test@example.com', name: 'Test User', password: hashedPassword };
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+      mockPrisma.refreshToken.create.mockResolvedValue({});
+
+      await login({ email: '  TEST@EXAMPLE.COM  ', password: 'Password123!' });
+
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
     });
 
     it('throws error on invalid email', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
-      await expect(login(mockRes, { email: 'wrong@example.com', password: 'Pass' }))
+      await expect(login({ email: 'wrong@example.com', password: 'Pass' }))
         .rejects.toThrow('Invalid credentials');
     });
 
@@ -165,7 +217,7 @@ describe('Auth Service', () => {
       const hashedPassword = await bcrypt.hash('CorrectPassword123!', 12);
       mockPrisma.user.findUnique.mockResolvedValue({ id: 'user123', email: 'test@example.com', password: hashedPassword });
 
-      await expect(login(mockRes, { email: 'test@example.com', password: 'WrongPassword' }))
+      await expect(login({ email: 'test@example.com', password: 'WrongPassword' }))
         .rejects.toThrow('Invalid credentials');
     });
   });
@@ -173,9 +225,10 @@ describe('Auth Service', () => {
   describe('refresh', () => {
     it('rotates tokens correctly', async () => {
       const user = { id: 'user123', email: 'test@example.com', name: 'Test User' };
-      const oldToken = jwt.sign({ sub: user.id, jti: 'old-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d' });
+      const oldToken = jwt.sign({ sub: user.id, jti: 'old-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
       const oldHash = hashToken(oldToken);
-      const tokenRecord = { id: 'token123', tokenHash: oldHash, userId: user.id, isUsed: false, user };
+      const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const tokenRecord = { id: 'token123', tokenHash: oldHash, userId: user.id, isUsed: false, user, expiresAt: futureDate };
 
       mockPrisma.refreshToken.findUnique.mockResolvedValue(tokenRecord);
       mockPrisma.$transaction.mockImplementation(async (callback) => {
@@ -188,31 +241,91 @@ describe('Auth Service', () => {
         return callback(mockTx);
       });
 
-      const result = await refresh(mockRes, oldToken);
+      const result = await refresh(oldToken);
 
       expect(mockPrisma.refreshToken.findUnique).toHaveBeenCalledWith({ where: { tokenHash: oldHash }, include: { user: true } });
       expect(mockPrisma.$transaction).toHaveBeenCalled();
-      expect(mockRes.cookie).toHaveBeenCalledTimes(2);
+      expect(result.accessToken).toBeDefined();
+      expect(result.refreshToken).toBeDefined();
+      expect(result.csrfToken).toBeDefined();
       expect(result.user.id).toBe(user.id);
     });
 
     it('detects token reuse and revokes all user tokens', async () => {
       const user = { id: 'user123', email: 'test@example.com' };
-      const usedToken = jwt.sign({ sub: user.id, jti: 'used-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d' });
+      const usedToken = jwt.sign({ sub: user.id, jti: 'used-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
       const usedHash = hashToken(usedToken);
-      const tokenRecord = { id: 'token123', tokenHash: usedHash, userId: user.id, isUsed: true, user };
+      const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const tokenRecord = { id: 'token123', tokenHash: usedHash, userId: user.id, isUsed: true, user, expiresAt: futureDate };
 
       mockPrisma.refreshToken.findUnique.mockResolvedValue(tokenRecord);
       mockPrisma.refreshToken.deleteMany.mockResolvedValue({ count: 5 });
 
-      await expect(refresh(mockRes, usedToken)).rejects.toThrow('Token reuse detected');
+      await expect(refresh(usedToken)).rejects.toThrow('Token reuse detected');
       expect(mockPrisma.refreshToken.deleteMany).toHaveBeenCalledWith({ where: { userId: user.id } });
+    });
+
+    it('throws error for expired token', async () => {
+      const user = { id: 'user123', email: 'test@example.com' };
+      const expiredToken = jwt.sign({ sub: user.id, jti: 'expired-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
+      const expiredHash = hashToken(expiredToken);
+      const pastDate = new Date(Date.now() - 1000);
+      const tokenRecord = { id: 'token123', tokenHash: expiredHash, userId: user.id, isUsed: false, user, expiresAt: pastDate };
+
+      mockPrisma.refreshToken.findUnique.mockResolvedValue(tokenRecord);
+      mockPrisma.refreshToken.delete.mockResolvedValue({});
+
+      await expect(refresh(expiredToken)).rejects.toThrow('Refresh token expired');
+      expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({ where: { id: 'token123' } });
     });
 
     it('throws error for invalid token', async () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValue(null);
 
-      await expect(refresh(mockRes, 'invalid-token')).rejects.toThrow('Invalid refresh token');
+      await expect(refresh('invalid-token')).rejects.toThrow('Invalid refresh token');
+    });
+
+    it('rejects token with wrong issuer', async () => {
+      const user = { id: 'user123', email: 'test@example.com' };
+      const badToken = jwt.sign({ sub: user.id, jti: 'bad-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: 'wrong-issuer', audience: JWT_AUDIENCE });
+      const badHash = hashToken(badToken);
+      const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const tokenRecord = { id: 'token123', tokenHash: badHash, userId: user.id, isUsed: false, user, expiresAt: futureDate };
+
+      mockPrisma.refreshToken.findUnique.mockResolvedValue(tokenRecord);
+
+      await expect(refresh(badToken)).rejects.toThrow('Invalid or expired token');
+    });
+
+    it('deletes token record when jwt signature is invalid', async () => {
+      const user = { id: 'user123', email: 'test@example.com' };
+      const badToken = jwt.sign({ sub: user.id, jti: 'bad-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
+      const badHash = hashToken(badToken);
+      const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const tokenRecord = { id: 'token123', tokenHash: badHash, userId: user.id, isUsed: false, user, expiresAt: futureDate };
+
+      mockPrisma.refreshToken.findUnique.mockResolvedValue(tokenRecord);
+      mockPrisma.refreshToken.delete.mockResolvedValue({});
+      const originalVerify = jwt.verify;
+      jest.spyOn(jwt, 'verify').mockImplementationOnce(() => { throw new Error('invalid signature'); });
+
+      await expect(refresh(badToken)).rejects.toThrow('Invalid or expired token');
+      expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({ where: { tokenHash: badHash } });
+      jwt.verify.mockImplementation(originalVerify);
+    });
+
+    it('revokes all user tokens on subject mismatch', async () => {
+      const user = { id: 'user123', email: 'test@example.com' };
+      const goodToken = jwt.sign({ sub: 'user123', jti: 'good-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
+      const goodHash = hashToken(goodToken);
+      const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const tokenRecord = { id: 'token123', tokenHash: goodHash, userId: 'other-user', isUsed: false, user, expiresAt: futureDate };
+
+      mockPrisma.refreshToken.findUnique.mockResolvedValue(tokenRecord);
+      mockPrisma.refreshToken.deleteMany.mockResolvedValue({ count: 3 });
+
+      await expect(refresh(goodToken)).rejects.toThrow('Invalid refresh token');
+      expect(mockPrisma.refreshToken.deleteMany).toHaveBeenCalledWith({ where: { userId: 'other-user' } });
     });
   });
 
@@ -220,10 +333,9 @@ describe('Auth Service', () => {
     it('invalidates all user refresh tokens', async () => {
       mockPrisma.refreshToken.deleteMany.mockResolvedValue({ count: 3 });
 
-      const result = await logout(mockRes, 'user123');
+      const result = await logout('user123');
 
       expect(mockPrisma.refreshToken.deleteMany).toHaveBeenCalledWith({ where: { userId: 'user123' } });
-      expect(mockRes.clearCookie).toHaveBeenCalledTimes(2);
       expect(result.message).toBe('Logged out successfully');
     });
   });

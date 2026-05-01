@@ -17,7 +17,14 @@ jest.unstable_mockModule('../../controllers/auth.controller.js', () => ({
 }));
 
 jest.unstable_mockModule('../../middleware/auth.js', () => ({
-  requireAuth: jest.fn((req, res, next) => next()),
+  requireAuth: jest.fn((req, res, next) => {
+    req.user = { id: 'user123', email: 'test@example.com' };
+    next();
+  }),
+}));
+
+jest.unstable_mockModule('../../middleware/csrf.js', () => ({
+  csrfProtect: jest.fn((req, res, next) => next()),
 }));
 
 const { errorHandler } = await import('../../middleware/errorHandler.js');
@@ -85,6 +92,15 @@ describe('Auth Routes', () => {
 
       expect(res.status).toBe(400);
     });
+
+    it('returns 400 for unknown fields', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .set('Content-Type', 'application/json')
+        .send({ email: 'test@example.com', password: 'Password123!', name: 'Test', unknown: 'field' });
+
+      expect(res.status).toBe(400);
+    });
   });
 
   describe('POST /api/auth/login', () => {
@@ -114,6 +130,15 @@ describe('Auth Routes', () => {
         .send({ email: 'test@example.com', password: 'WrongPassword' });
 
       expect(res.status).toBe(401);
+    });
+
+    it('returns 400 for unknown fields', async () => {
+      const res = await request(app)
+        .post('/api/auth/login')
+        .set('Content-Type', 'application/json')
+        .send({ email: 'test@example.com', password: 'Password123!', unknown: 'field' });
+
+      expect(res.status).toBe(400);
     });
   });
 
