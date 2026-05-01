@@ -8,15 +8,34 @@ import morgan from 'morgan';
 import { initSocket } from './socket/index.js';
 import { NotFound } from './utils/AppError.js';
 import corsConfig from './config/cors.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { authLimiter, apiLimiter, refreshLimiter } from './middleware/rateLimiter.js';
+import authRoutes from './routes/auth.routes.js';
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:', 'https:', 'res.cloudinary.com'],
+    }
+  }
+}));
 app.use(cors(corsConfig));
 app.use(cookieParser());
 app.use(express.json());
 app.use(morgan('dev'));
+
+app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/refresh', refreshLimiter);
+app.use('/api/auth', authRoutes);
+app.use('/api/', apiLimiter);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -26,17 +45,7 @@ app.use((req, res, next) => {
   next(new NotFound('Route not found'));
 });
 
-app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || 'Internal Server Error';
-
-  res.status(statusCode).json({
-    status: 'error',
-    statusCode,
-    message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-  });
-});
+app.use(errorHandler);
 
 const httpServer = createServer(app);
 initSocket(httpServer);

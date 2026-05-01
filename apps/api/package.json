@@ -7,28 +7,34 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "lint": "eslint src/",
-    "db:migrate": "node -e \"console.error('Prisma is not configured for apps/api yet: missing prisma/schema.prisma. Replace this placeholder when Prisma is introduced.'); process.exit(1)\"",
-    "db:seed": "node -e \"console.error('Prisma seed is not configured for apps/api yet: missing prisma schema and seed entrypoint. Replace this placeholder when Prisma is introduced.'); process.exit(1)\""
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:seed": "node prisma/seed.js",
+    "db:generate": "prisma generate"
   },
   "dependencies": {
     "@fredocloud/shared": "*",
-    "express": "^5.0.0",
-    "cors": "^2.8.5",
-    "cookie-parser": "^1.4.6",
-    "helmet": "^7.1.0",
-    "morgan": "^1.10.0",
-    "jsonwebtoken": "^9.0.2",
-    "bcryptjs": "^2.4.3",
-    "dotenv": "^16.4.5",
     "@prisma/client": "^5.22.0",
-    "socket.io": "^4.8.1",
+    "bcryptjs": "^2.4.3",
     "cloudinary": "^2.5.1",
-    "multer": "^1.4.5-lts.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^5.0.0",
     "express-rate-limit": "^7.4.1",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.8.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "eslint": "^8.57.0",
+    "jest": "^30.3.0",
     "prisma": "^5.22.0",
-    "eslint": "^8.57.0"
+    "supertest": "^7.2.2"
   }
 }
