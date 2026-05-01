@@ -567,61 +567,61 @@ export default function ProtectedRoute({ children }) {
 ## Implementation Checklist
 
 ### Database
-- [ ] Task 2A-1: Prisma schema created with all 11 models
-- [ ] Task 2A-2: Prisma client singleton configured
-- [ ] Task 2A-3: Environment variables updated with JWT keys
+- [x] Task 2A-1: Prisma schema created with all 11 models
+- [x] Task 2A-2: Prisma client singleton configured
+- [x] Task 2A-3: Environment variables updated with JWT keys
 
 ### Auth Service
-- [ ] Task 2B-1: Auth service with RS256, bcrypt, token rotation
-- [ ] Task 2B-2: Audit log service created
+- [x] Task 2B-1: Auth service with RS256, bcrypt, token rotation
+- [x] Task 2B-2: Audit log service created
 
 ### Middleware
-- [ ] Task 2C-1: Zod validators for register/login
-- [ ] Task 2C-2: requireAuth middleware (RS256 verify)
-- [ ] Task 2C-3: Rate limiters (auth: 5/15min, api: 100/15min)
-- [ ] Task 2C-4: Error handler middleware
+- [x] Task 2C-1: Zod validators for register/login
+- [x] Task 2C-2: requireAuth middleware (RS256 verify)
+- [x] Task 2C-3: Rate limiters (auth: 5/15min, api: 100/15min)
+- [x] Task 2C-4: Error handler middleware
 
 ### Routes & Controllers
-- [ ] Task 2D-1: Auth controller (register, login, refresh, logout, me)
-- [ ] Task 2D-2: Auth routes mounted at /api/auth
+- [x] Task 2D-1: Auth controller (register, login, refresh, logout, me)
+- [x] Task 2D-2: Auth routes mounted at /api/auth
 
 ### Server
-- [ ] Task 2E-1: Express server updated with helmet CSP, rate limiting
+- [x] Task 2E-1: Express server updated with helmet CSP, rate limiting
 
 ### Seed
-- [ ] Task 2F-1: Seed script creates demo@fredocloud.com
+- [x] Task 2F-1: Seed script creates demo@fredocloud.com
 
 ### Frontend
-- [ ] Task 2G-1: apiFetch wrapper with credentials: include
-- [ ] Task 2G-2: Zustand auth store
-- [ ] Task 2G-3: ProtectedRoute component
+- [x] Task 2G-1: apiFetch wrapper with credentials: include
+- [x] Task 2G-2: Zustand auth store
+- [x] Task 2G-3: ProtectedRoute component
 
 ### Tests
-- [ ] Task 2H-1: Auth service unit tests
-- [ ] Task 2H-2: Auth routes integration tests
-- [ ] Task 2H-3: Auth middleware unit tests
+- [x] Task 2H-1: Auth service unit tests
+- [x] Task 2H-2: Auth routes integration tests
+- [ ] Task 2H-3: Auth middleware unit tests (skipped - ESM mocking complexity)
 
 ### Validation
-- [ ] All tests pass
-- [ ] Lint passes (npm run lint)
+- [x] All tests pass (27 tests)
+- [ ] Lint passes (web needs typescript - separate issue)
 
 ---
 
 ## Definition of Done
 
-- [ ] All 11 Prisma models created with proper relations
-- [ ] Database migration runs successfully
-- [ ] Register → Login → /me flow works end-to-end
-- [ ] Refresh token rotation works (old token invalidated, new issued)
-- [ ] Refresh token reuse triggers security revocation
-- [ ] Logout clears cookies and invalidates refresh token
-- [ ] Rate limiting blocks after 5 failed auth attempts
-- [ ] Protected routes return 401 for unauthenticated users
-- [ ] Next.js ProtectedRoute redirects to /login
-- [ ] Seed script creates demo@fredocloud.com / Password123!
-- [ ] All unit tests pass
-- [ ] Lint passes with no errors
-- [ ] PR created targeting main
+- [x] All 11 Prisma models created with proper relations
+- [x] Database migration runs successfully
+- [x] Register → Login → /me flow works end-to-end
+- [x] Refresh token rotation works (old token invalidated, new issued)
+- [x] Refresh token reuse triggers security revocation
+- [x] Logout clears cookies and invalidates refresh token
+- [x] Rate limiting blocks after 5 failed auth attempts
+- [x] Protected routes return 401 for unauthenticated users
+- [x] Next.js ProtectedRoute redirects to /login
+- [x] Seed script creates demo@fredocloud.com / Password123!
+- [x] All unit tests pass (27 tests)
+- [ ] Lint passes with no errors (web needs typescript - separate issue)
+- [x] PR created targeting main
 
 ---
 
