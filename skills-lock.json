@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "skills": {
+    "auth-security-expert": {
+      "source": "oimiragieo/agent-studio",
+      "sourceType": "github",
+      "computedHash": "4356e7b871924772c7f6a0a336760f2074e1a84c1b68f6954d86a721146d058c"
+    },
+    "cloudinary-docs": {
+      "source": "cloudinary-devs/skills",
+      "sourceType": "github",
+      "computedHash": "008ae2171abcd39257acb7393c04560e1825f98d79616e755f05a79bf39b058a"
+    },
+    "expressjs-development": {
+      "source": "manutej/luxor-claude-marketplace",
+      "sourceType": "github",
+      "computedHash": "79f9dce5dc9912b8a9ad9fd153885554106aef902822650601023c7f41b080af"
+    },
+    "nextjs": {
+      "source": "vercel-labs/vercel-plugin",
+      "sourceType": "github",
+      "computedHash": "d3a48eada4dbae95856d643a0c9c54a38974ee7896a4d34f93aead13d26c343a"
+    },
+    "nodejs-backend-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "c6a99966c2565acc388e574039127abc770bb9a3338be761e421e16f023f702b"
+    },
+    "nodejs-best-practices": {
+      "source": "antigravity-awesome-skills/skills",
+      "sourceType": "github",
+      "computedHash": "c81a98dfa5e363df1df692415ef46f8a0d92993cfa76d177a4249c7f33dbf8e0"
+    },
+    "prisma-expert": {
+      "source": "antigravity-awesome-skills/skills",
+      "sourceType": "github",
+      "computedHash": "c81a98dfa5e363df1df692415ef46f8a0d92993cfa76d177a2149c7f33dbf8e0"
+    },
+    "prisma-postgres-setup": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "computedHash": "5dbcf5a488d7cb7136340b86dcf781d6d92cf793f92c105ef644ac31ccac4d3b"
+    },
+    "socket-io": {
+      "source": "claude-dev-suite/claude-dev-suite",
+      "sourceType": "github",
+      "computedHash": "db530d917a8ad12522e3eaf040db5101bf7ac6cef066814577b8fb909a5b429b"
+    },
+    "turborepo": {
+      "source": "vercel/turborepo",
+      "sourceType": "github",
+      "computedHash": "243df386da21418c9ed2906bd0863152286e08db5a2e5629399962daf88a4051"
+    },
+    "zustand": {
+      "source": "lobehub/lobehub/skills",
+      "sourceType": "github",
+      "computedHash": "23ac939a48e922a6cfa0950b430962f0366b3a2f9426f67548745108b0b7364b"
+    }
+  }
+}
