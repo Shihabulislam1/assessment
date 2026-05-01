@@ -7,8 +7,8 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "lint": "eslint src/",
-    "db:migrate": "prisma migrate dev",
-    "db:seed": "prisma db seed"
+    "db:migrate": "node -e \"console.error('Prisma is not configured for apps/api yet: missing prisma/schema.prisma. Replace this placeholder when Prisma is introduced.'); process.exit(1)\"",
+    "db:seed": "node -e \"console.error('Prisma seed is not configured for apps/api yet: missing prisma schema and seed entrypoint. Replace this placeholder when Prisma is introduced.'); process.exit(1)\""
   },
   "dependencies": {
     "@fredocloud/shared": "*",

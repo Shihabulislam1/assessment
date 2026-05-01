@@ -5,7 +5,14 @@ import { io } from 'socket.io-client';
 
 export default function Home() {
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL);
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL?.trim();
+
+    if (!socketUrl) {
+      console.warn('Socket.io connection skipped: NEXT_PUBLIC_SOCKET_URL is not configured.');
+      return;
+    }
+
+    const socket = io(socketUrl);
 
     socket.on('connect', () => {
       console.log('Socket.io connected:', socket.id);
