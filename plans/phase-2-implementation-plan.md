@@ -567,7 +567,7 @@ export default function ProtectedRoute({ children }) {
 ## Implementation Checklist
 
 ### Database
-- [x] Task 2A-1: Prisma schema created with all 11 models
+- [x] Task 2A-1: Prisma schema created with all 13 models
 - [x] Task 2A-2: Prisma client singleton configured
 - [x] Task 2A-3: Environment variables updated with JWT keys
 
@@ -609,7 +609,7 @@ export default function ProtectedRoute({ children }) {
 
 ## Definition of Done
 
-- [x] All 11 Prisma models created with proper relations
+- [x] All 13 Prisma models created with proper relations
 - [x] Database migration runs successfully
 - [x] Register → Login → /me flow works end-to-end
 - [x] Refresh token rotation works (old token invalidated, new issued)
@@ -630,7 +630,7 @@ export default function ProtectedRoute({ children }) {
 ```
 apps/api/
 ├── prisma/
-│   ├── schema.prisma              # 11 models
+│   ├── schema.prisma              # 13 models
 │   └── seed.js                   # demo@fredocloud.com
 ├── src/
 │   ├── config/
