@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { UnauthorizedError } from '../utils/AppError.js';
+import { Unauthorized } from '../utils/AppError.js';
 import prisma from '../config/db.js';
 
 const JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY.replace(/\\n/g, '\n');
@@ -63,7 +63,7 @@ const clearCookies = (res) => {
 
 export const register = async (res, { email, password, name }) => {
   const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) throw new UnauthorizedError('Email already registered');
+  if (existing) throw new Unauthorized('Email already registered');
 
   const hashedPassword = await hashPassword(password);
   const user = await prisma.user.create({
@@ -84,10 +84,10 @@ export const register = async (res, { email, password, name }) => {
 
 export const login = async (res, { email, password }) => {
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new UnauthorizedError('Invalid credentials');
+  if (!user) throw new Unauthorized('Invalid credentials');
 
   const valid = await verifyPassword(password, user.password);
-  if (!valid) throw new UnauthorizedError('Invalid credentials');
+  if (!valid) throw new Unauthorized('Invalid credentials');
 
   const accessToken = generateAccessToken(user);
   const { token: refreshToken, jti } = generateRefreshToken(user);
@@ -102,7 +102,7 @@ export const login = async (res, { email, password }) => {
 };
 
 export const refresh = async (res, refreshToken) => {
-  if (!refreshToken) throw new UnauthorizedError('No refresh token');
+  if (!refreshToken) throw new Unauthorized('No refresh token');
 
   const tokenHash = hashToken(refreshToken);
   const tokenRecord = await prisma.refreshToken.findUnique({
@@ -114,14 +114,14 @@ export const refresh = async (res, refreshToken) => {
     if (tokenRecord?.userId) {
       await prisma.refreshToken.deleteMany({ where: { userId: tokenRecord.userId } });
     }
-    throw new UnauthorizedError('Token reuse detected');
+    throw new Unauthorized('Token reuse detected');
   }
 
   let decoded;
   try {
     decoded = jwt.verify(refreshToken, JWT_PUBLIC_KEY, { algorithms: ['RS256'] });
   } catch {
-    throw new UnauthorizedError('Invalid or expired token');
+    throw new Unauthorized('Invalid or expired token');
   }
 
   const user = tokenRecord.user;
@@ -154,6 +154,6 @@ export const getMe = async (userId) => {
     where: { id: userId },
     select: { id: true, email: true, name: true, avatarUrl: true, createdAt: true },
   });
-  if (!user) throw new UnauthorizedError('User not found');
+  if (!user) throw new Unauthorized('User not found');
   return { user };
 };
