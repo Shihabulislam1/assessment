@@ -11,6 +11,11 @@ import corsConfig from './config/cors.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { authLimiter, apiLimiter, refreshLimiter } from './middleware/rateLimiter.js';
 import authRoutes from './routes/auth.routes.js';
+import workspaceRoutes from './routes/workspace.routes.js';
+import goalRoutes from './routes/goal.routes.js';
+import actionItemRoutes from './routes/actionItem.routes.js';
+import announcementRoutes from './routes/announcement.routes.js';
+import auditRoutes from './routes/audit.routes.js';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -35,6 +40,11 @@ app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/refresh', refreshLimiter);
 app.use('/api/auth', authRoutes);
+app.use('/api/workspaces', workspaceRoutes);
+app.use('/api/workspaces/:workspaceId/goals', goalRoutes);
+app.use('/api/workspaces/:workspaceId/items', actionItemRoutes);
+app.use('/api/workspaces/:workspaceId/announcements', announcementRoutes);
+app.use('/api/workspaces/:workspaceId/audit-log', auditRoutes);
 app.use('/api/', apiLimiter);
 
 app.get('/api/health', (req, res) => {
