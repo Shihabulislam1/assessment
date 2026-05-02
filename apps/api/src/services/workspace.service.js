@@ -1,6 +1,15 @@
 import prisma from '../config/db.js';
 import { createAuditLog } from './audit.service.js';
-import { NotFound, Conflict } from '../utils/AppError.js';
+import { NotFound, Conflict, Forbidden } from '../utils/AppError.js';
+
+const ensureAdmin = async (userId, workspaceId) => {
+  const member = await prisma.workspaceMember.findUnique({
+    where: { userId_workspaceId: { userId, workspaceId } },
+  });
+  if (!member || member.role !== 'ADMIN') {
+    throw new Forbidden('You do not have administrative privileges in this workspace');
+  }
+};
 
 export const createWorkspace = async (userId, data) => {
   const workspace = await prisma.workspace.create({
@@ -51,6 +60,8 @@ export const getWorkspaceById = async (workspaceId) => {
 };
 
 export const updateWorkspace = async (workspaceId, userId, data) => {
+  await ensureAdmin(userId, workspaceId);
+
   const workspace = await prisma.workspace.update({
     where: { id: workspaceId },
     data: {
@@ -69,6 +80,8 @@ export const updateWorkspace = async (workspaceId, userId, data) => {
 };
 
 export const deleteWorkspace = async (workspaceId, userId) => {
+  await ensureAdmin(userId, workspaceId);
+
   await prisma.workspace.delete({ where: { id: workspaceId } });
 
   await createAuditLog({
@@ -78,6 +91,8 @@ export const deleteWorkspace = async (workspaceId, userId) => {
 };
 
 export const inviteMember = async (workspaceId, inviterId, data) => {
+  await ensureAdmin(inviterId, workspaceId);
+
   const invitee = await prisma.user.findUnique({ where: { email: data.email } });
   if (!invitee) throw new NotFound('User not found with that email');
 
@@ -115,6 +130,8 @@ export const inviteMember = async (workspaceId, inviterId, data) => {
 };
 
 export const updateMemberRole = async (workspaceId, memberId, adminId, data) => {
+  await ensureAdmin(adminId, workspaceId);
+
   const membership = await prisma.workspaceMember.update({
     where: { id: memberId, workspaceId },
     data: { role: data.role },
@@ -130,6 +147,8 @@ export const updateMemberRole = async (workspaceId, memberId, adminId, data) => 
 };
 
 export const removeMember = async (workspaceId, memberId, adminId) => {
+  await ensureAdmin(adminId, workspaceId);
+
   await prisma.workspaceMember.delete({ where: { id: memberId, workspaceId } });
 
   await createAuditLog({

@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 
 import { GeneralSettingsForm } from '@/components/dashboard/settings/GeneralSettingsForm';
 import { TeamMemberList } from '@/components/dashboard/settings/TeamMemberList';
+import { DeleteWorkspaceCard } from '@/components/dashboard/settings/DeleteWorkspaceCard';
 
 export default function WorkspaceSettingsPage() {
   const { workspaceId } = useParams();
@@ -28,6 +29,8 @@ export default function WorkspaceSettingsPage() {
       console.error('Logout failed:', err);
     }
   };
+
+  const isAdmin = currentWorkspace?.members?.find(m => m.userId === user?.id)?.role === 'ADMIN';
 
   return (
     <div className="flex flex-col gap-8 max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
@@ -52,9 +55,16 @@ export default function WorkspaceSettingsPage() {
 
           <TeamMemberList 
             members={currentWorkspace?.members} 
-            isAdmin={currentWorkspace?.members?.find(m => m.userId === user?.id)?.role === 'ADMIN'}
+            isAdmin={isAdmin}
             onInviteSuccess={fetchWorkspaces}
           />
+
+          {isAdmin && (
+            <DeleteWorkspaceCard 
+              workspaceId={workspaceId} 
+              workspaceName={currentWorkspace?.name} 
+            />
+          )}
         </div>
 
         <div className="space-y-6">

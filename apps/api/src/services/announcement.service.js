@@ -127,7 +127,7 @@ export const toggleReaction = async (workspaceId, announcementId, userId, data) 
   await createAuditLog({
     action: result.removed ? 'DELETE' : 'CREATE',
     entity: 'Reaction',
-    entityId: result.id || result.id, // result is either the new reaction object or the toggle result
+    entityId: result.id,
     changes: { emoji: data.emoji },
     userId,
     workspaceId,

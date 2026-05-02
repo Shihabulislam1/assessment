@@ -1,7 +1,9 @@
-const isServer = typeof window === 'undefined';
-const API_URL = isServer ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000') : '';
+import { useAuthStore } from '../store/authStore';
 
 export async function apiFetch(path, options = {}) {
+  const isServer = typeof window === 'undefined';
+  const API_URL = isServer ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000') : '';
+
   const headers = { ...options.headers };
   const hasBody = options.body !== undefined && options.body !== null;
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
@@ -30,8 +32,9 @@ export async function apiFetch(path, options = {}) {
 
   let res = await makeRequest();
 
-  // If unauthorized, try to refresh token
-  if (res.status === 401 && path !== '/api/auth/login' && path !== '/api/auth/refresh') {
+  // If unauthorized, try to refresh token once
+  if (res.status === 401 && path !== '/api/auth/login' && path !== '/api/auth/refresh' && !options._isRetry) {
+    options._isRetry = true;
     try {
       const refreshRes = await fetch(`${API_URL}/api/auth/refresh`, {
         method: 'POST',
@@ -44,9 +47,13 @@ export async function apiFetch(path, options = {}) {
       if (refreshRes.ok) {
         // Retry original request
         res = await makeRequest();
+      } else if (refreshRes.status === 401) {
+        // Refresh token itself is invalid, logout
+        useAuthStore.getState().logout();
       }
     } catch (err) {
       console.error('Token refresh failed:', err);
+      useAuthStore.getState().logout();
     }
   }
 
