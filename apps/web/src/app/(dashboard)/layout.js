@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
@@ -13,6 +13,7 @@ export default function DashboardLayout({ children }) {
   const { workspaces, currentWorkspace, fetchWorkspaces, setCurrentWorkspace } = useWorkspaceStore();
   const router = useRouter();
   const pathname = usePathname();
+  const { workspaceId } = useParams();
 
   useEffect(() => {
     if (!initialized) return;
@@ -24,8 +25,6 @@ export default function DashboardLayout({ children }) {
       fetchWorkspaces();
     }
   }, [user, initialized, router]);
-
-  const workspaceId = pathname.split('/')[2];
 
   useEffect(() => {
     if (!initialized) return;

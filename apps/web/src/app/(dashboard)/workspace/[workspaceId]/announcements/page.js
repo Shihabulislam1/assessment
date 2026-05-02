@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { Megaphone } from 'lucide-react';
 import { useAnnouncementStore } from '@/store/announcementStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useAuthStore } from '@/store/authStore';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 
 import { PageHeader } from '@/components/dashboard/shared/PageHeader';
@@ -15,6 +16,7 @@ export default function AnnouncementsPage() {
   const { workspaceId } = useParams();
   const { announcements, fetchAnnouncements, createAnnouncement, deleteAnnouncement, isLoading } = useAnnouncementStore();
   const { currentWorkspace } = useWorkspaceStore();
+  const { user } = useAuthStore();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -26,7 +28,7 @@ export default function AnnouncementsPage() {
     setOpen(false);
   };
 
-  const isAdmin = currentWorkspace?.members?.some((m) => m.user.id === currentWorkspace?.userId && m.role === 'ADMIN');
+  const isAdmin = currentWorkspace?.members?.some((m) => m.user.id === user?.id && m.role === 'ADMIN');
 
   return (
     <div className="flex flex-col gap-8">

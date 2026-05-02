@@ -53,10 +53,17 @@ export async function exportAuditLogsCsv(workspaceId, query) {
     orderBy: { createdAt: 'desc' },
   });
 
+  const sanitize = (val) => {
+    if (!val) return '';
+    const str = String(val);
+    return ['=', '+', '-', '@'].includes(str[0]) ? `'${str}` : str;
+  };
+
   const header = 'Action,Entity,EntityId,User,Date,Changes\n';
   const rows = logs.map(log => {
     const changes = log.changes ? JSON.stringify(log.changes).replace(/"/g, '""') : '';
-    return `${log.action},${log.entity},${log.entityId},${log.user?.name || 'Unknown'},${log.createdAt.toISOString()},"${changes}"`;
+    const user = log.user?.name || 'Unknown';
+    return `${sanitize(log.action)},${sanitize(log.entity)},${sanitize(log.entityId)},"${sanitize(user)}",${log.createdAt.toISOString()},"${changes}"`;
   }).join('\n');
 
   return header + rows;

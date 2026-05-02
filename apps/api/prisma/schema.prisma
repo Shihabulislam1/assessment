@@ -145,6 +145,8 @@ model ActionItem {
   @@index([workspaceId])
   @@index([assigneeId])
   @@index([status])
+  @@index([priority])
+  @@index([goalId])
   @@map("action_items")
 }
 
@@ -210,6 +212,7 @@ model AuditLog {
 
   @@index([workspaceId, createdAt])
   @@index([entity])
+  @@index([action])
   @@map("audit_logs")
 }
 

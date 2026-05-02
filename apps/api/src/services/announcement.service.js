@@ -106,25 +106,32 @@ export const toggleReaction = async (workspaceId, announcementId, userId, data) 
   const announcement = await prisma.announcement.findFirst({ where: { id: announcementId, workspaceId } });
   if (!announcement) throw new NotFound('Announcement not found');
 
-  const existing = await prisma.reaction.findUnique({
-    where: { userId_announcementId_emoji: { userId, announcementId, emoji: data.emoji } },
-  });
+  const result = await prisma.$transaction(async (tx) => {
+    const existing = await tx.reaction.findUnique({
+      where: { userId_announcementId_emoji: { userId, announcementId, emoji: data.emoji } },
+    });
 
-  if (existing) {
-    await prisma.reaction.delete({ where: { id: existing.id } });
-    await createAuditLog({ action: 'DELETE', entity: 'Reaction', entityId: existing.id, changes: { emoji: data.emoji }, userId, workspaceId });
-    return { emoji: data.emoji, removed: true };
-  }
+    if (existing) {
+      await tx.reaction.delete({ where: { id: existing.id } });
+      return { emoji: data.emoji, removed: true, id: existing.id };
+    }
 
-  const reaction = await prisma.reaction.create({
-    data: { userId, announcementId, emoji: data.emoji },
-    include: { user: { select: { id: true, name: true } } },
+    const reaction = await tx.reaction.create({
+      data: { userId, announcementId, emoji: data.emoji },
+      include: { user: { select: { id: true, name: true } } },
+    });
+
+    return reaction;
   });
 
   await createAuditLog({
-    action: 'CREATE', entity: 'Reaction', entityId: reaction.id,
-    changes: { emoji: data.emoji }, userId, workspaceId,
+    action: result.removed ? 'DELETE' : 'CREATE',
+    entity: 'Reaction',
+    entityId: result.id || result.id, // result is either the new reaction object or the toggle result
+    changes: { emoji: data.emoji },
+    userId,
+    workspaceId,
   });
 
-  return reaction;
+  return result;
 };

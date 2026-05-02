@@ -81,31 +81,37 @@ export const inviteMember = async (workspaceId, inviterId, data) => {
   const invitee = await prisma.user.findUnique({ where: { email: data.email } });
   if (!invitee) throw new NotFound('User not found with that email');
 
-  const existing = await prisma.workspaceMember.findUnique({
-    where: { userId_workspaceId: { userId: invitee.id, workspaceId } },
-  });
-  if (existing) throw new Conflict('User is already a member of this workspace');
+  try {
+    const membership = await prisma.$transaction(async (tx) => {
+      const m = await tx.workspaceMember.create({
+        data: { userId: invitee.id, workspaceId, role: data.role || 'MEMBER' },
+        include: { user: { select: { id: true, email: true, name: true, avatarUrl: true } } },
+      });
 
-  const membership = await prisma.workspaceMember.create({
-    data: { userId: invitee.id, workspaceId, role: data.role || 'MEMBER' },
-    include: { user: { select: { id: true, email: true, name: true, avatarUrl: true } } },
-  });
+      await tx.notification.create({
+        data: {
+          type: 'WORKSPACE_INVITE',
+          content: 'You have been invited to a workspace',
+          userId: invitee.id,
+          linkUrl: `/workspace/${workspaceId}`,
+        },
+      });
 
-  await prisma.notification.create({
-    data: {
-      type: 'WORKSPACE_INVITE',
-      content: 'You have been invited to a workspace',
-      userId: invitee.id,
-      linkUrl: `/workspace/${workspaceId}`,
-    },
-  });
+      return m;
+    });
 
-  await createAuditLog({
-    action: 'ADD_MEMBER', entity: 'WorkspaceMember', entityId: membership.id,
-    changes: { email: data.email, role: data.role }, userId: inviterId, workspaceId,
-  });
+    await createAuditLog({
+      action: 'ADD_MEMBER', entity: 'WorkspaceMember', entityId: membership.id,
+      changes: { email: data.email, role: data.role }, userId: inviterId, workspaceId,
+    });
 
-  return membership;
+    return membership;
+  } catch (err) {
+    if (err.code === 'P2002') {
+      throw new Conflict('User is already a member of this workspace');
+    }
+    throw err;
+  }
 };
 
 export const updateMemberRole = async (workspaceId, memberId, adminId, data) => {

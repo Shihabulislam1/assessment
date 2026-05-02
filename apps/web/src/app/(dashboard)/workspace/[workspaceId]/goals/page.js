@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { Target, Plus, Rocket, Filter, Search } from 'lucide-react';
 import { useGoalStore } from '@/store/goalStore';
 import { useWorkspaceStore } from '@/store/workspaceStore';
+import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,7 @@ export default function GoalsPage() {
   const { workspaceId } = useParams();
   const { goals, fetchGoals, createGoal, deleteGoal, isLoading } = useGoalStore();
   const { currentWorkspace } = useWorkspaceStore();
+  const { user } = useAuthStore();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
 
@@ -30,7 +32,7 @@ export default function GoalsPage() {
     setOpen(false);
   };
 
-  const isAdmin = currentWorkspace?.members?.some((m) => m.user.id === currentWorkspace?.userId && m.role === 'ADMIN');
+  const isAdmin = currentWorkspace?.members?.some((m) => m.user.id === user?.id && m.role === 'ADMIN');
 
   const filteredGoals = goals.filter(g => 
     g.title.toLowerCase().includes(search.toLowerCase()) || 

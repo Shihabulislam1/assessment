@@ -29,6 +29,7 @@ export default function ActionItemsPage() {
   const { goals, fetchGoals } = useGoalStore();
   const { viewMode, setViewMode } = useUIStore();
   const [open, setOpen] = useState(false);
+  const [initialData, setInitialData] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState({ status: 'all', priority: 'all', sort: 'createdAt' });
 
@@ -75,6 +76,11 @@ export default function ActionItemsPage() {
     // Position updates could be handled here if backend supported it
   };
 
+  const handleOpenChange = (isOpen) => {
+    setOpen(isOpen);
+    if (!isOpen) setInitialData(null);
+  };
+
   const handleSubmit = async (formData) => {
     const payload = {
       ...formData,
@@ -82,7 +88,7 @@ export default function ActionItemsPage() {
       goalId: (formData.goalId === 'none' || formData.goalId === '') ? null : formData.goalId
     };
     await createItem(workspaceId, payload);
-    setOpen(false);
+    handleOpenChange(false);
   };
 
   const handleStatusToggle = async (item) => {
@@ -104,7 +110,7 @@ export default function ActionItemsPage() {
         description="Organize, track, and complete your team's essential tasks with precision."
         action={{
           label: "New Task",
-          onClick: () => setOpen(true)
+          onClick: () => handleOpenChange(true)
         }}
       >
         <div className="flex items-center rounded-xl border bg-muted/30 p-1 shadow-sm">
@@ -152,7 +158,7 @@ export default function ActionItemsPage() {
           <CardDescription className="text-lg max-w-sm mx-auto">
             No tasks found matching your filters. Start fresh by creating a new action item.
           </CardDescription>
-          <Button variant="outline" className="mt-8 rounded-xl" onClick={() => setOpen(true)}>
+          <Button variant="outline" className="mt-8 rounded-xl" onClick={() => handleOpenChange(true)}>
             <Plus className="mr-2 size-4" />
             Create First Task
           </Button>
@@ -172,7 +178,7 @@ export default function ActionItemsPage() {
           onStatusToggle={handleStatusToggle}
           onDelete={(id) => deleteItem(workspaceId, id)}
           onQuickAdd={(status) => {
-            // Quick add could pre-populate status, but for now just open dialog
+            setInitialData({ status });
             setOpen(true);
           }}
           isLoading={isLoading}
@@ -181,8 +187,9 @@ export default function ActionItemsPage() {
 
       <ActionItemDialog 
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={handleOpenChange}
         onSubmit={handleSubmit}
+        initialData={initialData}
         goals={goals}
         isLoading={isLoading}
       />

@@ -23,10 +23,14 @@ export const requireWorkspaceMember = async (req, res, next) => {
 
 export const requireRole = (...roles) => {
   return (req, res, next) => {
-    if (!req.membership) throw new Forbidden('Workspace membership not established');
-    if (!roles.includes(req.membership.role)) {
-      throw new Forbidden(`Requires one of the following roles: ${roles.join(', ')}`);
+    try {
+      if (!req.membership) throw new Forbidden('Workspace membership not established');
+      if (!roles.includes(req.membership.role)) {
+        throw new Forbidden(`Requires one of the following roles: ${roles.join(', ')}`);
+      }
+      next();
+    } catch (err) {
+      next(err);
     }
-    next();
   };
 };

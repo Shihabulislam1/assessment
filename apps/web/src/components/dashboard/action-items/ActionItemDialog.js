@@ -25,6 +25,7 @@ export function ActionItemDialog({ open, onOpenChange, onSubmit, goals = [], ini
     title: '', 
     description: '', 
     priority: 'MEDIUM', 
+    status: 'TODO',
     dueDate: '', 
     goalId: '' 
   });
@@ -35,11 +36,12 @@ export function ActionItemDialog({ open, onOpenChange, onSubmit, goals = [], ini
         title: initialData.title || '',
         description: initialData.description || '',
         priority: initialData.priority || 'MEDIUM',
+        status: initialData.status || 'TODO',
         dueDate: initialData.dueDate ? new Date(initialData.dueDate).toISOString().slice(0, 16) : '',
         goalId: initialData.goalId || ''
       });
     } else {
-      setForm({ title: '', description: '', priority: 'MEDIUM', dueDate: '', goalId: '' });
+      setForm({ title: '', description: '', priority: 'MEDIUM', status: 'TODO', dueDate: '', goalId: '' });
     }
   }, [initialData, open]);
 
@@ -98,15 +100,29 @@ export function ActionItemDialog({ open, onOpenChange, onSubmit, goals = [], ini
                 </Select>
               </div>
               <div className="flex flex-col gap-2">
-                <label htmlFor="dueDate" className="text-sm font-semibold">Due Date</label>
-                <Input 
-                  id="dueDate" 
-                  type="datetime-local" 
-                  value={form.dueDate} 
-                  onChange={(e) => setForm({ ...form, dueDate: e.target.value })} 
-                  className="h-11 rounded-lg" 
-                />
+                <label className="text-sm font-semibold">Status</label>
+                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+                  <SelectTrigger className="h-11 rounded-lg">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent rounded="xl">
+                    <SelectItem value="TODO">To Do</SelectItem>
+                    <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                    <SelectItem value="IN_REVIEW">In Review</SelectItem>
+                    <SelectItem value="DONE">Done</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="dueDate" className="text-sm font-semibold">Due Date</label>
+              <Input 
+                id="dueDate" 
+                type="datetime-local" 
+                value={form.dueDate} 
+                onChange={(e) => setForm({ ...form, dueDate: e.target.value })} 
+                className="h-11 rounded-lg" 
+              />
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold">Related Goal (Optional)</label>

@@ -18,3 +18,9 @@ export const apiLimiter = rateLimit({
   max: 100,
   message: { error: { message: 'Too many requests, slow down' } },
 });
+
+export const inviteLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  message: { error: { message: 'Too many invite attempts, try again later' } },
+});
