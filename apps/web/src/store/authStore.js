@@ -4,6 +4,7 @@ import { apiFetch } from '../lib/api';
 export const useAuthStore = create((set) => ({
   user: null,
   isLoading: true,
+  initialized: false,
 
   login: async (email, password) => {
     set({ isLoading: true });
@@ -12,7 +13,7 @@ export const useAuthStore = create((set) => ({
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
-      set({ user: data.user });
+      set({ user: data.user, isLoading: false });
     } finally {
       set({ isLoading: false });
     }
@@ -25,7 +26,7 @@ export const useAuthStore = create((set) => ({
         method: 'POST',
         body: JSON.stringify({ email, password, name }),
       });
-      set({ user: data.user });
+      set({ user: data.user, isLoading: false });
     } finally {
       set({ isLoading: false });
     }
@@ -33,15 +34,15 @@ export const useAuthStore = create((set) => ({
 
   logout: async () => {
     await apiFetch('/api/auth/logout', { method: 'POST' });
-    set({ user: null, isLoading: false });
+    set({ user: null, isLoading: false, initialized: true });
   },
 
   fetchUser: async () => {
     try {
       const data = await apiFetch('/api/auth/me');
-      set({ user: data.user, isLoading: false });
+      set({ user: data.user, isLoading: false, initialized: true });
     } catch {
-      set({ user: null, isLoading: false });
+      set({ user: null, isLoading: false, initialized: true });
     }
   },
 }));

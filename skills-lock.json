@@ -16,6 +16,11 @@
       "sourceType": "github",
       "computedHash": "79f9dce5dc9912b8a9ad9fd153885554106aef902822650601023c7f41b080af"
     },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
+    },
     "nextjs": {
       "source": "vercel-labs/vercel-plugin",
       "sourceType": "github",
@@ -40,6 +45,11 @@
       "source": "prisma/skills",
       "sourceType": "github",
       "computedHash": "5dbcf5a488d7cb7136340b86dcf781d6d92cf793f92c105ef644ac31ccac4d3b"
+    },
+    "shadcn": {
+      "source": "shadcn/ui",
+      "sourceType": "github",
+      "computedHash": "80a6226e78f6d1fe464214ae0ef449d49d8ffaa3e7704f011e9b418c678ad4d1"
     },
     "socket-io": {
       "source": "claude-dev-suite/claude-dev-suite",
