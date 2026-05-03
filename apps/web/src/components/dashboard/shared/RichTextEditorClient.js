@@ -54,7 +54,7 @@ export default function RichTextEditorClient({ value, onChange, placeholder = 'W
       },
       dataAttributes: ['id', 'value'],
       showDenotationChar: true,
-      defaultMenuOrientation: 'bottom',
+      defaultMenuOrientation: 'top',
       fixMentionsToQuill: true,
     },
   }), [mentionList]);

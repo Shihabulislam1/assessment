@@ -11,6 +11,7 @@ import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/dashboard/shared/PageHeader';
 import { AnnouncementCard } from '@/components/dashboard/announcements/AnnouncementCard';
 import { AnnouncementDialog } from '@/components/dashboard/announcements/AnnouncementDialog';
+import { AnnouncementDetailsDialog } from '@/components/dashboard/announcements/AnnouncementDetailsDialog';
 
 export default function AnnouncementsPage() {
   const { workspaceId } = useParams();
@@ -18,6 +19,7 @@ export default function AnnouncementsPage() {
   const { currentWorkspace } = useWorkspaceStore();
   const { user } = useAuthStore();
   const [open, setOpen] = useState(false);
+  const [selectedAnnouncementId, setSelectedAnnouncementId] = useState(null);
 
   useEffect(() => {
     if (workspaceId) fetchAnnouncements(workspaceId);
@@ -55,6 +57,7 @@ export default function AnnouncementsPage() {
               announcement={ann} 
               isAdmin={isAdmin}
               onDelete={(id) => deleteAnnouncement(workspaceId, id)}
+              onClick={(id) => setSelectedAnnouncementId(id)}
             />
           ))}
         </div>
@@ -65,6 +68,13 @@ export default function AnnouncementsPage() {
         onOpenChange={setOpen}
         onSubmit={handleSubmit}
         isLoading={isLoading}
+      />
+
+      <AnnouncementDetailsDialog
+        workspaceId={workspaceId}
+        announcementId={selectedAnnouncementId}
+        open={!!selectedAnnouncementId}
+        onOpenChange={(isOpen) => !isOpen && setSelectedAnnouncementId(null)}
       />
     </div>
   );

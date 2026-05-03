@@ -7,9 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 
-export function AnnouncementCard({ announcement, isAdmin, onDelete }) {
+export function AnnouncementCard({ announcement, isAdmin, onDelete, onClick }) {
   return (
-    <Card className={`relative overflow-hidden transition-all hover:shadow-sm ${announcement.isPinned ? 'border-l-4 border-l-primary' : ''}`}>
+    <Card 
+      className={`relative overflow-hidden transition-all hover:shadow-sm cursor-pointer ${announcement.isPinned ? 'border-l-4 border-l-primary' : ''}`}
+      onClick={() => onClick && onClick(announcement.id)}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">

@@ -15,6 +15,7 @@ import { useNotificationStore } from '@/store/notificationStore';
 import { NotificationBell } from '@/components/dashboard/notifications/NotificationBell';
 import { OnlineUsers } from '@/components/dashboard/shared/OnlineUsers';
 import { SocketStatus } from '@/components/dashboard/shared/SocketStatus';
+import { ErrorBoundary } from '@/components/dashboard/shared/ErrorBoundary';
 
 export default function DashboardLayout({ children }) {
   const { user, initialized } = useAuthStore();
