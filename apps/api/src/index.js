@@ -18,6 +18,7 @@ import announcementRoutes from './routes/announcement.routes.js';
 import auditRoutes from './routes/audit.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
+import analyticsRoutes from './routes/analytics.routes.js';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -49,6 +50,7 @@ app.use('/api/workspaces/:workspaceId/announcements', announcementRoutes);
 app.use('/api/workspaces/:workspaceId/audit-log', auditRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/workspaces/:workspaceId/analytics', analyticsRoutes);
 app.use('/api/', apiLimiter);
 
 app.get('/api/health', (req, res) => {
