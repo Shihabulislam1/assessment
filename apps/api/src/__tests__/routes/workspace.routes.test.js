@@ -2,18 +2,18 @@ import { jest } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 
-const mockGetWorkspaces = jest.fn();
-const mockCreateWorkspace = jest.fn();
-const mockDeleteWorkspace = jest.fn();
+const mockList = jest.fn();
+const mockCreate = jest.fn();
+const mockRemove = jest.fn();
 
 jest.unstable_mockModule('../../controllers/workspace.controller.js', () => ({
-  getWorkspaces: mockGetWorkspaces,
-  createWorkspace: mockCreateWorkspace,
-  deleteWorkspace: mockDeleteWorkspace,
-  getWorkspace: jest.fn(),
-  updateWorkspace: jest.fn(),
-  inviteMember: jest.fn(),
-  updateMemberRole: jest.fn(),
+  list: mockList,
+  create: mockCreate,
+  remove: mockRemove,
+  getById: jest.fn(),
+  update: jest.fn(),
+  invite: jest.fn(),
+  updateRole: jest.fn(),
   removeMember: jest.fn(),
 }));
 
@@ -49,7 +49,7 @@ describe('Workspace Routes', () => {
 
   describe('GET /api/workspaces', () => {
     it('returns 200 and list of workspaces', async () => {
-      mockGetWorkspaces.mockImplementation((req, res) => {
+      mockList.mockImplementation((req, res) => {
         res.status(200).json([{ id: 'ws1', name: 'WS1' }]);
       });
 
@@ -62,7 +62,7 @@ describe('Workspace Routes', () => {
 
   describe('POST /api/workspaces', () => {
     it('returns 201 for valid creation', async () => {
-      mockCreateWorkspace.mockImplementation((req, res) => {
+      mockCreate.mockImplementation((req, res) => {
         res.status(201).json({ id: 'ws2', name: 'WS2' });
       });
 
@@ -84,15 +84,15 @@ describe('Workspace Routes', () => {
   });
 
   describe('DELETE /api/workspaces/:workspaceId', () => {
-    it('calls delete controller', async () => {
-      mockDeleteWorkspace.mockImplementation((req, res) => {
+    it('calls remove controller', async () => {
+      mockRemove.mockImplementation((req, res) => {
         res.status(204).end();
       });
 
       const res = await request(app).delete('/api/workspaces/ws1');
 
       expect(res.status).toBe(204);
-      expect(mockDeleteWorkspace).toHaveBeenCalled();
+      expect(mockRemove).toHaveBeenCalled();
     });
   });
 });

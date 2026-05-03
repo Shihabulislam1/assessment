@@ -120,7 +120,7 @@ describe('Workspace Service', () => {
       
       mockPrisma.$transaction.mockImplementation(async (callback) => {
         const mockTx = {
-          workspaceMember: { create: jest.fn().mockResolvedValue({ id: 'mem123', ...invitee }) },
+          workspaceMember: { create: jest.fn().mockResolvedValue({ ...invitee, id: 'mem123' }) },
           notification: { create: jest.fn().mockResolvedValue({}) },
         };
         return callback(mockTx);
