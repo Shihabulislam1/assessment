@@ -74,4 +74,28 @@ export const useActionItemStore = create((set) => ({
   },
 
   reset: () => set({ items: [], currentItem: null, isLoading: false, error: null }),
+
+  subscribeToSocket: (socket) => {
+    socket.on('actionItem:created', (item) => {
+      set((state) => ({ items: [item, ...state.items] }));
+    });
+    socket.on('actionItem:updated', (item) => {
+      set((state) => ({
+        items: state.items.map((i) => (i.id === item.id ? item : i)),
+        currentItem: state.currentItem?.id === item.id ? item : state.currentItem,
+      }));
+    });
+    socket.on('actionItem:deleted', (itemId) => {
+      set((state) => ({
+        items: state.items.filter((i) => i.id !== itemId),
+        currentItem: state.currentItem?.id === itemId ? null : state.currentItem,
+      }));
+    });
+  },
+
+  unsubscribeFromSocket: (socket) => {
+    socket.off('actionItem:created');
+    socket.off('actionItem:updated');
+    socket.off('actionItem:deleted');
+  },
 }));

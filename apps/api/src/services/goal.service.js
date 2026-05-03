@@ -1,8 +1,36 @@
+import sanitizeHtml from 'sanitize-html';
 import prisma from '../config/db.js';
 import { createAuditLog } from './audit.service.js';
-import { NotFound } from '../utils/AppError.js';
+import { NotFound, Forbidden } from '../utils/AppError.js';
+import { extractMentions } from '../utils/mentions.js';
+import * as notificationService from './notification.service.js';
+
+const sanitize = (html) => sanitizeHtml(html, {
+  allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'span']),
+  allowedAttributes: { 
+    ...sanitizeHtml.defaults.allowedAttributes, 
+    img: ['src', 'alt'],
+    span: ['class', 'data-id', 'data-value', 'data-denotation-char', 'data-index']
+  },
+});
+
+const getMember = async (userId, workspaceId) => {
+  const member = await prisma.workspaceMember.findUnique({
+    where: { userId_workspaceId: { userId, workspaceId } },
+  });
+  if (!member) throw new Forbidden('You are not a member of this workspace');
+  return member;
+};
+
+const ensureAdmin = async (userId, workspaceId) => {
+  const member = await getMember(userId, workspaceId);
+  if (member.role !== 'ADMIN') {
+    throw new Forbidden('Only administrators can perform this action');
+  }
+};
 
 export const createGoal = async (workspaceId, userId, data) => {
+  await ensureAdmin(userId, workspaceId);
   const dueDate = data.dueDate ? new Date(data.dueDate) : null;
   if (data.dueDate && isNaN(dueDate.getTime())) {
     throw new Error('Invalid dueDate format');
@@ -62,6 +90,13 @@ export const getGoalById = async (workspaceId, goalId) => {
 };
 
 export const updateGoal = async (workspaceId, goalId, userId, data) => {
+  const member = await getMember(userId, workspaceId);
+  
+  // Only admins can change status
+  if (data.status && member.role !== 'ADMIN') {
+    throw new Forbidden('Only administrators can change goal status');
+  }
+
   const dueDate = data.dueDate ? new Date(data.dueDate) : null;
   if (data.dueDate && isNaN(dueDate.getTime())) {
     throw new Error('Invalid dueDate format');
@@ -90,6 +125,7 @@ export const updateGoal = async (workspaceId, goalId, userId, data) => {
 };
 
 export const deleteGoal = async (workspaceId, goalId, userId) => {
+  await ensureAdmin(userId, workspaceId);
   await prisma.goal.delete({ where: { id: goalId } });
 
   await createAuditLog({
@@ -99,6 +135,7 @@ export const deleteGoal = async (workspaceId, goalId, userId) => {
 };
 
 export const createMilestone = async (workspaceId, goalId, userId, data) => {
+  await getMember(userId, workspaceId);
   const milestone = await prisma.milestone.create({
     data: { title: data.title, goalId },
   });
@@ -112,6 +149,7 @@ export const createMilestone = async (workspaceId, goalId, userId, data) => {
 };
 
 export const updateMilestone = async (workspaceId, milestoneId, userId, data) => {
+  await getMember(userId, workspaceId);
   const milestone = await prisma.milestone.update({
     where: { id: milestoneId },
     data: { title: data.title, progress: data.progress },
@@ -126,6 +164,7 @@ export const updateMilestone = async (workspaceId, milestoneId, userId, data) =>
 };
 
 export const deleteMilestone = async (workspaceId, milestoneId, userId) => {
+  await ensureAdmin(userId, workspaceId);
   await prisma.milestone.delete({ where: { id: milestoneId } });
 
   await createAuditLog({
@@ -135,8 +174,9 @@ export const deleteMilestone = async (workspaceId, milestoneId, userId) => {
 };
 
 export const createActivity = async (workspaceId, goalId, userId, data) => {
+  const goal = await prisma.goal.findUnique({ where: { id: goalId } });
   const activity = await prisma.activity.create({
-    data: { content: data.content, goalId, userId },
+    data: { content: sanitize(data.content), goalId, userId },
     include: { user: { select: { id: true, name: true, avatarUrl: true } } },
   });
 
@@ -144,6 +184,29 @@ export const createActivity = async (workspaceId, goalId, userId, data) => {
     action: 'CREATE', entity: 'Activity', entityId: activity.id,
     changes: { content: data.content.substring(0, 100) }, userId, workspaceId,
   });
+
+  // Handle mentions
+  const mentionedNames = extractMentions(data.content);
+  if (mentionedNames.length > 0) {
+    const usersToNotify = await prisma.user.findMany({
+      where: { 
+        name: { in: mentionedNames, mode: 'insensitive' },
+        memberships: { some: { workspaceId } }
+      },
+      select: { id: true }
+    });
+    
+    for (const targetUser of usersToNotify) {
+      if (targetUser.id === userId) continue;
+      await notificationService.createNotification({
+        type: 'MENTION',
+        content: `${activity.user.name} mentioned you in a goal activity for: ${goal.title}`,
+        userId: targetUser.id,
+        workspaceId,
+        linkUrl: `/workspace/${workspaceId}/goals/${goalId}`
+      });
+    }
+  }
 
   return activity;
 };

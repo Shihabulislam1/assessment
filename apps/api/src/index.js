@@ -16,6 +16,8 @@ import goalRoutes from './routes/goal.routes.js';
 import actionItemRoutes from './routes/actionItem.routes.js';
 import announcementRoutes from './routes/announcement.routes.js';
 import auditRoutes from './routes/audit.routes.js';
+import uploadRoutes from './routes/upload.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -45,6 +47,8 @@ app.use('/api/workspaces/:workspaceId/goals', goalRoutes);
 app.use('/api/workspaces/:workspaceId/items', actionItemRoutes);
 app.use('/api/workspaces/:workspaceId/announcements', announcementRoutes);
 app.use('/api/workspaces/:workspaceId/audit-log', auditRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api/', apiLimiter);
 
 app.get('/api/health', (req, res) => {

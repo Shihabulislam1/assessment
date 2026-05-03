@@ -68,6 +68,7 @@ export const updateWorkspace = async (workspaceId, userId, data) => {
       name: data.name,
       description: data.description,
       accentColor: data.accentColor,
+      imageUrl: data.imageUrl,
     },
   });
 

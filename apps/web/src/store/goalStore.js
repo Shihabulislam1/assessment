@@ -81,4 +81,78 @@ export const useGoalStore = create((set) => ({
   },
 
   reset: () => set({ goals: [], currentGoal: null, isLoading: false, error: null }),
+
+  subscribeToSocket: (socket) => {
+    socket.on('goal:created', (goal) => {
+      set((state) => ({ goals: [goal, ...state.goals] }));
+    });
+    socket.on('goal:updated', (goal) => {
+      set((state) => ({
+        goals: state.goals.map((g) => (g.id === goal.id ? goal : g)),
+        currentGoal: state.currentGoal?.id === goal.id ? goal : state.currentGoal,
+      }));
+    });
+    socket.on('goal:deleted', (goalId) => {
+      set((state) => ({
+        goals: state.goals.filter((g) => g.id !== goalId),
+        currentGoal: state.currentGoal?.id === goalId ? null : state.currentGoal,
+      }));
+    });
+    socket.on('milestone:created', ({ goalId, milestone }) => {
+      set((state) => {
+        const updateGoal = (g) => g.id === goalId ? { ...g, milestones: [...(g.milestones || []), milestone] } : g;
+        return {
+          goals: state.goals.map(updateGoal),
+          currentGoal: state.currentGoal?.id === goalId ? updateGoal(state.currentGoal) : state.currentGoal,
+        };
+      });
+    });
+    socket.on('milestone:updated', ({ milestoneId, milestone }) => {
+      set((state) => {
+        const updateGoal = (g) => ({
+          ...g,
+          milestones: g.milestones?.map((m) => (m.id === milestoneId ? milestone : m)),
+        });
+        return {
+          goals: state.goals.map(updateGoal),
+          currentGoal: state.currentGoal ? updateGoal(state.currentGoal) : null,
+        };
+      });
+    });
+    socket.on('milestone:deleted', ({ milestoneId }) => {
+      set((state) => {
+        const updateGoal = (g) => ({
+          ...g,
+          milestones: g.milestones?.filter((m) => m.id !== milestoneId),
+        });
+        return {
+          goals: state.goals.map(updateGoal),
+          currentGoal: state.currentGoal ? updateGoal(state.currentGoal) : null,
+        };
+      });
+    });
+    socket.on('activity:created', ({ goalId, activity }) => {
+      set((state) => {
+        if (state.currentGoal?.id === goalId) {
+          return {
+            currentGoal: {
+              ...state.currentGoal,
+              activities: [activity, ...(state.currentGoal.activities || [])],
+            },
+          };
+        }
+        return state;
+      });
+    });
+  },
+
+  unsubscribeFromSocket: (socket) => {
+    socket.off('goal:created');
+    socket.off('goal:updated');
+    socket.off('goal:deleted');
+    socket.off('milestone:created');
+    socket.off('milestone:updated');
+    socket.off('milestone:deleted');
+    socket.off('activity:created');
+  },
 }));

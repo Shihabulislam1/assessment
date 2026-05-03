@@ -1,8 +1,10 @@
 import * as actionItemService from '../services/actionItem.service.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import { getIO } from '../socket/index.js';
 
 export const create = asyncHandler(async (req, res) => {
   const item = await actionItemService.createActionItem(req.params.workspaceId, req.user.id, req.body);
+  getIO().to(`workspace:${req.params.workspaceId}`).emit('actionItem:created', item);
   res.status(201).json({ item });
 });
 
@@ -18,10 +20,12 @@ export const getById = asyncHandler(async (req, res) => {
 
 export const update = asyncHandler(async (req, res) => {
   const item = await actionItemService.updateActionItem(req.params.workspaceId, req.params.itemId, req.user.id, req.body);
+  getIO().to(`workspace:${req.params.workspaceId}`).emit('actionItem:updated', item);
   res.json({ item });
 });
 
 export const remove = asyncHandler(async (req, res) => {
   await actionItemService.deleteActionItem(req.params.workspaceId, req.params.itemId, req.user.id);
+  getIO().to(`workspace:${req.params.workspaceId}`).emit('actionItem:deleted', req.params.itemId);
   res.status(204).send();
 });

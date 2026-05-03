@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '../shared/RichTextEditor';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 
 export function AnnouncementDialog({ open, onOpenChange, onSubmit, isLoading }) {
+  const { currentWorkspace } = useWorkspaceStore();
   const [form, setForm] = useState({ title: '', content: '', isPinned: false });
 
   const handleSubmit = (e) => {
@@ -45,13 +47,11 @@ export function AnnouncementDialog({ open, onOpenChange, onSubmit, isLoading }) 
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="ann-content" className="text-sm font-medium">Content</label>
-              <Textarea 
-                id="ann-content" 
-                placeholder="Write your announcement..." 
-                className="min-h-[150px]" 
+              <RichTextEditor 
                 value={form.content} 
-                onChange={(e) => setForm({ ...form, content: e.target.value })} 
-                required 
+                onChange={(val) => setForm({ ...form, content: val })} 
+                placeholder="Write your announcement..." 
+                members={currentWorkspace?.members || []}
               />
             </div>
             <div className="flex items-center gap-2">

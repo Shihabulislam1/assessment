@@ -91,4 +91,38 @@ export const useAnnouncementStore = create((set) => ({
   },
 
   reset: () => set({ announcements: [], currentAnnouncement: null, isLoading: false, error: null }),
+
+  subscribeToSocket: (socket) => {
+    socket.on('announcement:created', (announcement) => {
+      set((state) => ({ announcements: [announcement, ...state.announcements] }));
+    });
+    socket.on('announcement:updated', (announcement) => {
+      set((state) => ({
+        announcements: state.announcements.map((a) => (a.id === announcement.id ? announcement : a)),
+        currentAnnouncement: state.currentAnnouncement?.id === announcement.id ? announcement : state.currentAnnouncement,
+      }));
+    });
+    socket.on('announcement:deleted', (id) => {
+      set((state) => ({
+        announcements: state.announcements.filter((a) => a.id !== id),
+        currentAnnouncement: state.currentAnnouncement?.id === id ? null : state.currentAnnouncement,
+      }));
+    });
+    socket.on('comment:created', ({ announcementId, comment }) => {
+      set((state) => {
+        const updateAnnouncement = (a) => a.id === announcementId ? { ...a, comments: [...(a.comments || []), comment] } : a;
+        return {
+          announcements: state.announcements.map(updateAnnouncement),
+          currentAnnouncement: state.currentAnnouncement?.id === announcementId ? updateAnnouncement(state.currentAnnouncement) : state.currentAnnouncement,
+        };
+      });
+    });
+  },
+
+  unsubscribeFromSocket: (socket) => {
+    socket.off('announcement:created');
+    socket.off('announcement:updated');
+    socket.off('announcement:deleted');
+    socket.off('comment:created');
+  },
 }));
