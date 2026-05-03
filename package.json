@@ -11,7 +11,8 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "db:migrate": "turbo run db:migrate --filter=api",
-    "db:seed": "turbo run db:seed --filter=api"
+    "db:seed": "turbo run db:seed --filter=api",
+    "postinstall": "turbo run db:generate"
   },
   "devDependencies": {
     "turbo": "^2.9.7"
