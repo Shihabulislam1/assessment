@@ -14,7 +14,7 @@ import { useAnnouncementStore } from '@/store/announcementStore';
 import { useNotificationStore } from '@/store/notificationStore';
 import { NotificationBell } from '@/components/dashboard/notifications/NotificationBell';
 import { OnlineUsers } from '@/components/dashboard/shared/OnlineUsers';
-import { ErrorBoundary } from '@/components/dashboard/shared/ErrorBoundary';
+import { SocketStatus } from '@/components/dashboard/shared/SocketStatus';
 
 export default function DashboardLayout({ children }) {
   const { user, initialized } = useAuthStore();
@@ -91,6 +91,7 @@ export default function DashboardLayout({ children }) {
           <div className="flex items-center gap-4">
             <OnlineUsers />
             <Separator orientation="vertical" className="h-12 mx-1" />
+            <SocketStatus />
             <NotificationBell />
           </div>
         </header>

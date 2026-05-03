@@ -4,7 +4,7 @@ import * as cookie from 'cookie';
 import corsConfig from '../config/cors.js';
 
 let io;
-const onlineUsers = new Map(); // workspaceId -> Set(userIds)
+const onlineUsers = new Map(); // workspaceId -> Map(userId -> Set(socketId))
 
 const getOptionalMultilineEnv = (name) => {
   const value = process.env[name];
@@ -60,14 +60,20 @@ export const initSocket = (httpServer) => {
       
       // Update presence
       if (!onlineUsers.has(workspaceId)) {
-        onlineUsers.set(workspaceId, new Set());
+        onlineUsers.set(workspaceId, new Map());
       }
-      onlineUsers.get(workspaceId).add(userId);
+      
+      const workspaceMap = onlineUsers.get(workspaceId);
+      if (!workspaceMap.has(userId)) {
+        workspaceMap.set(userId, new Set());
+      }
+      
+      workspaceMap.get(userId).add(socket.id);
       
       // Notify others in workspace
-      io.to(`workspace:${workspaceId}`).emit('online-users', Array.from(onlineUsers.get(workspaceId)));
+      io.to(`workspace:${workspaceId}`).emit('online-users', Array.from(workspaceMap.keys()));
       
-      console.log(`User ${userId} joined workspace ${workspaceId}`);
+      console.log(`User ${userId} joined workspace ${workspaceId} (Socket: ${socket.id})`);
     });
 
     socket.on('leave-workspace', (workspaceId) => {
@@ -75,21 +81,35 @@ export const initSocket = (httpServer) => {
       
       // Update presence
       if (onlineUsers.has(workspaceId)) {
-        onlineUsers.get(workspaceId).delete(userId);
-        io.to(`workspace:${workspaceId}`).emit('online-users', Array.from(onlineUsers.get(workspaceId)));
+        const workspaceMap = onlineUsers.get(workspaceId);
+        if (workspaceMap.has(userId)) {
+          workspaceMap.get(userId).delete(socket.id);
+          
+          if (workspaceMap.get(userId).size === 0) {
+            workspaceMap.delete(userId);
+            io.to(`workspace:${workspaceId}`).emit('online-users', Array.from(workspaceMap.keys()));
+          }
+        }
       }
       
-      console.log(`User ${userId} left workspace ${workspaceId}`);
+      console.log(`User ${userId} left workspace ${workspaceId} (Socket: ${socket.id})`);
     });
 
     socket.on('disconnect', () => {
       console.log(`User ${userId} disconnected from socket ${socket.id}`);
       
       // Cleanup presence from all workspaces
-      onlineUsers.forEach((users, workspaceId) => {
-        if (users.has(userId)) {
-          users.delete(userId);
-          io.to(`workspace:${workspaceId}`).emit('online-users', Array.from(users));
+      onlineUsers.forEach((workspaceMap, workspaceId) => {
+        if (workspaceMap.has(userId)) {
+          const sockets = workspaceMap.get(userId);
+          if (sockets.has(socket.id)) {
+            sockets.delete(socket.id);
+            
+            if (sockets.size === 0) {
+              workspaceMap.delete(userId);
+              io.to(`workspace:${workspaceId}`).emit('online-users', Array.from(workspaceMap.keys()));
+            }
+          }
         }
       });
     });

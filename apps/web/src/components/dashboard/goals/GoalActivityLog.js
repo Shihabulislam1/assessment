@@ -15,7 +15,8 @@ export function GoalActivityLog({ workspaceId, goalId, activities }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const postActivity = async () => {
-    if (!content || content === '<p><br></p>') return;
+    const strippedContent = content.replace(/<[^>]*>/g, '').trim();
+    if (!strippedContent) return;
     setIsSubmitting(true);
     try {
       await apiFetch(`/api/workspaces/${workspaceId}/goals/${goalId}/activities`, {
@@ -50,7 +51,7 @@ export function GoalActivityLog({ workspaceId, goalId, activities }) {
 
       <div 
         ref={scrollRef}
-        className="h-[500px] overflow-y-auto p-4 flex flex-col gap-6 scroll-smooth"
+        className="flex-1 min-h-[400px] overflow-y-auto p-4 flex flex-col gap-6 scroll-smooth"
       >
         {sortedActivities.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
@@ -92,7 +93,7 @@ export function GoalActivityLog({ workspaceId, goalId, activities }) {
         <div className="flex justify-end">
           <Button 
             onClick={postActivity}
-            disabled={isSubmitting || !content || content === '<p><br></p>'}
+            disabled={isSubmitting || !content.replace(/<[^>]*>/g, '').trim()}
             className="gap-2"
           >
             {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}

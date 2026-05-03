@@ -9,6 +9,9 @@ const mockPrisma = {
     update: jest.fn(),
     updateMany: jest.fn(),
   },
+  workspaceMember: {
+    findMany: jest.fn(),
+  },
 };
 
 const mockIO = {
@@ -39,7 +42,7 @@ describe('Notification Service', () => {
 
   describe('createNotification', () => {
     it('creates a notification and emits to user room', async () => {
-      const data = { type: 'MENTION', content: 'test', userId: 'user1', linkUrl: '/test' };
+      const data = { type: 'MENTION', content: 'test', userId: 'user1', workspaceId: 'ws1', linkUrl: '/test' };
       const created = { id: 'notif1', ...data, isRead: false, createdAt: new Date() };
       
       mockPrisma.notification.create.mockResolvedValue(created);
@@ -54,13 +57,29 @@ describe('Notification Service', () => {
   });
 
   describe('getUserNotifications', () => {
-    it('returns notifications and unread count', async () => {
+    it('returns notifications and unread count filtered by workspace membership', async () => {
       const notifications = [{ id: '1', content: 'test' }];
+      const activeWorkspaces = [{ workspaceId: 'ws1' }];
+      
+      mockPrisma.workspaceMember.findMany.mockResolvedValue(activeWorkspaces);
       mockPrisma.notification.findMany.mockResolvedValue(notifications);
       mockPrisma.notification.count.mockResolvedValue(1);
 
       const result = await getUserNotifications('user1');
 
+      expect(mockPrisma.workspaceMember.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user1' },
+        select: { workspaceId: true }
+      });
+      expect(mockPrisma.notification.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: expect.objectContaining({
+          userId: 'user1',
+          OR: expect.arrayContaining([
+            { workspaceId: null },
+            { workspaceId: { in: ['ws1'] } }
+          ])
+        })
+      }));
       expect(result.notifications).toEqual(notifications);
       expect(result.unreadCount).toBe(1);
     });

@@ -2,9 +2,9 @@ import prisma from '../config/db.js';
 import { getIO } from '../socket/index.js';
 import { NotFound, Forbidden } from '../utils/AppError.js';
 
-export const createNotification = async ({ type, content, userId, linkUrl }) => {
+export const createNotification = async ({ type, content, userId, workspaceId, linkUrl }) => {
   const notification = await prisma.notification.create({
-    data: { type, content, userId, linkUrl },
+    data: { type, content, userId, workspaceId, linkUrl },
   });
 
   try {
@@ -23,14 +23,34 @@ export const createNotification = async ({ type, content, userId, linkUrl }) => 
 };
 
 export const getUserNotifications = async (userId) => {
+  // Get user's current workspaces
+  const memberships = await prisma.workspaceMember.findMany({
+    where: { userId },
+    select: { workspaceId: true }
+  });
+  const activeWorkspaceIds = memberships.map(m => m.workspaceId);
+
   const [notifications, unreadCount] = await Promise.all([
     prisma.notification.findMany({
-      where: { userId },
+      where: { 
+        userId,
+        OR: [
+          { workspaceId: null },
+          { workspaceId: { in: activeWorkspaceIds } }
+        ]
+      },
       orderBy: { createdAt: 'desc' },
       take: 50,
     }),
     prisma.notification.count({
-      where: { userId, isRead: false },
+      where: { 
+        userId, 
+        isRead: false,
+        OR: [
+          { workspaceId: null },
+          { workspaceId: { in: activeWorkspaceIds } }
+        ]
+      },
     }),
   ]);
 

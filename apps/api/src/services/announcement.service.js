@@ -48,6 +48,7 @@ export const createAnnouncement = async (workspaceId, userId, data) => {
         type: 'MENTION',
         content: `${announcement.author.name} mentioned you in an announcement: ${announcement.title}`,
         userId: targetUser.id,
+        workspaceId,
         linkUrl: `/workspace/${workspaceId}/announcements`
       });
     }
@@ -144,6 +145,7 @@ export const createComment = async (workspaceId, announcementId, userId, data) =
         type: 'MENTION',
         content: `${comment.author.name} mentioned you in a comment on: ${announcement.title}`,
         userId: targetUser.id,
+        workspaceId,
         linkUrl: `/workspace/${workspaceId}/announcements`
       });
     }

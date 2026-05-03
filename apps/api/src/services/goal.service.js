@@ -202,6 +202,7 @@ export const createActivity = async (workspaceId, goalId, userId, data) => {
         type: 'MENTION',
         content: `${activity.user.name} mentioned you in a goal activity for: ${goal.title}`,
         userId: targetUser.id,
+        workspaceId,
         linkUrl: `/workspace/${workspaceId}/goals/${goalId}`
       });
     }
