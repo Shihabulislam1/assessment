@@ -9,6 +9,7 @@ export const isOriginAllowed = (origin) => {
   return ALLOWED_ORIGINS.includes(origin);
 };
 
+// Express CORS middleware (used with cors() package)
 export default (req, callback) => {
   const origin = req.headers.origin;
 
@@ -21,4 +22,17 @@ export default (req, callback) => {
   } else {
     callback(new Error('Not allowed by CORS'));
   }
+};
+
+// Socket.IO CORS config — uses the plain-object format Socket.IO expects.
+// The `origin` field accepts a function with (origin, callback) signature.
+export const socketCorsConfig = {
+  origin: (origin, callback) => {
+    if (!origin || isOriginAllowed(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
 };

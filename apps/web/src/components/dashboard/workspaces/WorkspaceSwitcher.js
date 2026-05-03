@@ -23,8 +23,6 @@ export function WorkspaceSwitcher() {
   const { workspaces, currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  console.log('WorkspaceSwitcher state:', { isCreateDialogOpen });
-
   const handleSelect = (workspace) => {
     setCurrentWorkspace(workspace);
     router.push(`/workspace/${workspace.id}`);
@@ -53,9 +51,9 @@ export function WorkspaceSwitcher() {
             <ChevronsUpDown className="size-5 text-muted-foreground shrink-0 group-data-[collapsible=icon]:hidden opacity-50" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent 
-          className="w-64 rounded-2xl p-2 shadow-2xl border-muted-foreground/10 animate-in slide-in-from-top-1 duration-200" 
-          align="start" 
+        <DropdownMenuContent
+          className="w-64 rounded-2xl p-2 shadow-2xl border-muted-foreground/10 animate-in slide-in-from-top-1 duration-200"
+          align="start"
           sideOffset={8}
         >
           <DropdownMenuGroup>
@@ -76,9 +74,9 @@ export function WorkspaceSwitcher() {
                     {ws.imageUrl ? (
                       <img src={ws.imageUrl} alt={ws.name} className="size-6 rounded-md object-cover border border-muted-foreground/10" />
                     ) : (
-                      <div 
-                        className="size-2 rounded-full" 
-                        style={{ backgroundColor: ws.accentColor || '#6366f1' }} 
+                      <div
+                        className="size-2 rounded-full"
+                        style={{ backgroundColor: ws.accentColor || '#6366f1' }}
                       />
                     )}
                     <span className="truncate max-w-[140px]">{ws.name}</span>
@@ -90,7 +88,7 @@ export function WorkspaceSwitcher() {
           </DropdownMenuGroup>
           <DropdownMenuSeparator className="-mx-2 mb-2" />
           <DropdownMenuGroup>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onSelect={(e) => {
                 e.preventDefault();
                 console.log('Create Team Selected (onSelect)');
@@ -111,9 +109,9 @@ export function WorkspaceSwitcher() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <CreateWorkspaceDialog 
-        open={isCreateDialogOpen} 
-        onOpenChange={setIsCreateDialogOpen} 
+      <CreateWorkspaceDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
       />
     </div>
   );
