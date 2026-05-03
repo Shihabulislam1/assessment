@@ -14,12 +14,18 @@ const sanitize = (html) => sanitizeHtml(html, {
   },
 });
 
-const ensureAdmin = async (userId, workspaceId) => {
+const getMember = async (userId, workspaceId) => {
   const member = await prisma.workspaceMember.findUnique({
     where: { userId_workspaceId: { userId, workspaceId } },
   });
-  if (!member || member.role !== 'ADMIN') {
-    throw new Forbidden('Only administrators can modify goals in this workspace');
+  if (!member) throw new Forbidden('You are not a member of this workspace');
+  return member;
+};
+
+const ensureAdmin = async (userId, workspaceId) => {
+  const member = await getMember(userId, workspaceId);
+  if (member.role !== 'ADMIN') {
+    throw new Forbidden('Only administrators can perform this action');
   }
 };
 
@@ -84,7 +90,13 @@ export const getGoalById = async (workspaceId, goalId) => {
 };
 
 export const updateGoal = async (workspaceId, goalId, userId, data) => {
-  await ensureAdmin(userId, workspaceId);
+  const member = await getMember(userId, workspaceId);
+  
+  // Only admins can change status
+  if (data.status && member.role !== 'ADMIN') {
+    throw new Forbidden('Only administrators can change goal status');
+  }
+
   const dueDate = data.dueDate ? new Date(data.dueDate) : null;
   if (data.dueDate && isNaN(dueDate.getTime())) {
     throw new Error('Invalid dueDate format');
@@ -123,6 +135,7 @@ export const deleteGoal = async (workspaceId, goalId, userId) => {
 };
 
 export const createMilestone = async (workspaceId, goalId, userId, data) => {
+  await getMember(userId, workspaceId);
   const milestone = await prisma.milestone.create({
     data: { title: data.title, goalId },
   });
@@ -136,6 +149,7 @@ export const createMilestone = async (workspaceId, goalId, userId, data) => {
 };
 
 export const updateMilestone = async (workspaceId, milestoneId, userId, data) => {
+  await getMember(userId, workspaceId);
   const milestone = await prisma.milestone.update({
     where: { id: milestoneId },
     data: { title: data.title, progress: data.progress },
@@ -150,6 +164,7 @@ export const updateMilestone = async (workspaceId, milestoneId, userId, data) =>
 };
 
 export const deleteMilestone = async (workspaceId, milestoneId, userId) => {
+  await ensureAdmin(userId, workspaceId);
   await prisma.milestone.delete({ where: { id: milestoneId } });
 
   await createAuditLog({

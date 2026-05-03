@@ -6,19 +6,21 @@ import corsConfig from '../config/cors.js';
 let io;
 const onlineUsers = new Map(); // workspaceId -> Set(userIds)
 
-const getRequiredMultilineEnv = (name) => {
+const getOptionalMultilineEnv = (name) => {
   const value = process.env[name];
-  if (typeof value !== 'string' || value.trim() === '') {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
+  if (!value) return null;
   return value.replace(/\\n/g, '\n');
 };
 
-const JWT_PUBLIC_KEY = getRequiredMultilineEnv('JWT_PUBLIC_KEY');
+let JWT_PUBLIC_KEY = getOptionalMultilineEnv('JWT_PUBLIC_KEY');
 const JWT_ISSUER = process.env.JWT_ISSUER || 'fredocloud';
 const JWT_AUDIENCE = process.env.JWT_AUDIENCE || 'fredocloud-api';
 
 export const initSocket = (httpServer) => {
+  if (!JWT_PUBLIC_KEY) {
+    console.warn('WARNING: JWT_PUBLIC_KEY is not set. Socket authentication will fail.');
+  }
+
   io = new Server(httpServer, {
     cors: corsConfig,
     cookie: true

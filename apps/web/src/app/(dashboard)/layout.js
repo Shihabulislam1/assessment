@@ -14,6 +14,7 @@ import { useAnnouncementStore } from '@/store/announcementStore';
 import { useNotificationStore } from '@/store/notificationStore';
 import { NotificationBell } from '@/components/dashboard/notifications/NotificationBell';
 import { OnlineUsers } from '@/components/dashboard/shared/OnlineUsers';
+import { ErrorBoundary } from '@/components/dashboard/shared/ErrorBoundary';
 
 export default function DashboardLayout({ children }) {
   const { user, initialized } = useAuthStore();
@@ -25,7 +26,7 @@ export default function DashboardLayout({ children }) {
 
   useEffect(() => {
     const socket = socketRef.current;
-    if (socket) {
+    if (socket && user) {
       useGoalStore.getState().subscribeToSocket(socket);
       useActionItemStore.getState().subscribeToSocket(socket);
       useAnnouncementStore.getState().subscribeToSocket(socket);
@@ -41,7 +42,7 @@ export default function DashboardLayout({ children }) {
         socket.off('notification:new');
       };
     }
-  }, [socketRef, workspaceId]);
+  }, [socketRef, workspaceId, user]);
 
   useEffect(() => {
     if (user) {
@@ -95,7 +96,9 @@ export default function DashboardLayout({ children }) {
         </header>
         <main className="flex-1 overflow-y-auto bg-background/50">
           <div className="mx-auto max-w-7xl p-6 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {children}
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
           </div>
         </main>
       </SidebarInset>

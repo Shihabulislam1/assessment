@@ -8,9 +8,15 @@ export const createNotification = async ({ type, content, userId, linkUrl }) => 
   });
 
   try {
-    getIO().to(`user:${userId}`).emit('notification:new', notification);
+    const io = getIO();
+    io.to(`user:${userId}`).emit('notification:new', notification);
   } catch (err) {
-    console.error('Failed to emit notification via socket:', err);
+    // Only log if it's not a "not initialized" error, or handle specifically
+    if (err.message === 'Socket.io not initialized') {
+      console.warn(`Socket.io not initialized. Notification for user ${userId} stored in DB but not emitted.`);
+    } else {
+      console.error(`CRITICAL: Failed to emit notification via socket to user ${userId}:`, err);
+    }
   }
 
   return notification;

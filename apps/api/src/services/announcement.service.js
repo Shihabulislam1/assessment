@@ -118,7 +118,7 @@ export const createComment = async (workspaceId, announcementId, userId, data) =
   if (!announcement) throw new NotFound('Announcement not found');
 
   const comment = await prisma.comment.create({
-    data: { content: data.content, authorId: userId, announcementId },
+    data: { content: sanitize(data.content), authorId: userId, announcementId },
     include: { author: { select: { id: true, name: true, avatarUrl: true } } },
   });
 
