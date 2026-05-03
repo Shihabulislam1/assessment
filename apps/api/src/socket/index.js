@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import * as cookie from 'cookie';
-import corsConfig from '../config/cors.js';
+import corsConfig, { socketCorsConfig } from '../config/cors.js';
 import prisma from '../config/db.js';
 
 let io;
@@ -23,15 +23,19 @@ export const initSocket = (httpServer) => {
   }
 
   io = new Server(httpServer, {
-    cors: corsConfig,
-    cookie: true
+    cors: socketCorsConfig,
   });
 
   // Authentication middleware
   io.use((socket, next) => {
     try {
-      const cookies = cookie.parse(socket.handshake.headers.cookie || '');
-      const token = cookies.access_token;
+      // Primary: short-lived token fetched via /api/auth/socket-token
+      // Fallback: access_token cookie (works in same-origin / local dev)
+      let token = socket.handshake.auth?.token;
+      if (!token) {
+        const cookies = cookie.parse(socket.handshake.headers.cookie || '');
+        token = cookies.access_token;
+      }
 
       if (!token) {
         return next(new Error('Authentication error: No token provided'));

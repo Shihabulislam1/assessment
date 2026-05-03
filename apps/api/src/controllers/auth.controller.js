@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import * as authService from '../services/auth.service.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import { setCsrfCookie, clearCsrfCookie } from '../middleware/csrf.js';
@@ -69,4 +70,28 @@ export const logout = asyncHandler(async (req, res) => {
 export const me = asyncHandler(async (req, res) => {
   const result = await authService.getMe(req.user.id);
   res.status(200).json(result);
+});
+
+// Issues a short-lived JWT for Socket.IO authentication.
+// Called by the frontend just before connecting the socket.
+// Avoids cross-domain cookie issues by using the normal credentialed HTTP channel.
+const getJwtPrivateKey = () => {
+  const key = process.env.JWT_PRIVATE_KEY;
+  if (!key) throw new Error('Missing JWT_PRIVATE_KEY');
+  return key.replace(/\\n/g, '\n');
+};
+
+export const socketToken = asyncHandler(async (req, res) => {
+  const privateKey = getJwtPrivateKey();
+  const token = jwt.sign(
+    { sub: req.user.id },
+    privateKey,
+    {
+      algorithm: 'RS256',
+      expiresIn: '60s',
+      issuer: process.env.JWT_ISSUER || 'fredocloud',
+      audience: process.env.JWT_AUDIENCE || 'fredocloud-api',
+    }
+  );
+  res.json({ token });
 });
