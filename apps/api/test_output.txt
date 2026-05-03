@@ -1,0 +1,62 @@
+
+> api@1.0.0 test
+> NODE_OPTIONS='--experimental-vm-modules' NODE_ENV=test jest src/__tests__/services/actionItem.service.test.js
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "railway", schema "test" at "switchyard.proxy.rlwy.net:21776"
+
+3 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+(node:104479) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/__tests__/services/actionItem.service.test.js (61.976 s)
+  Action Item Service
+    createActionItem
+      ✓ creates an action item successfully (7515 ms)
+      ✓ creates an item without dueDate (3990 ms)
+    listActionItems
+      ✕ lists and filters action items (6155 ms)
+      ✓ sorts action items correctly (5923 ms)
+      ✓ uses default sort if invalid sort provided (4709 ms)
+    getActionItemById
+      ✓ returns item with details (4890 ms)
+      ✓ throws NotFound if item not found (2791 ms)
+    updateActionItem
+      ✓ updates action item successfully (5853 ms)
+      ✓ updates item and sets dueDate to null (5203 ms)
+    deleteActionItem
+      ✓ deletes action item successfully (5374 ms)
+
+  ● Action Item Service › listActionItems › lists and filters action items
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 2
+    Received array:  [{"assignee": null, "assigneeId": null, "createdAt": 2026-05-03T14:32:03.218Z, "description": null, "dueDate": null, "goal": null, "goalId": null, "id": "cmopvd66q000p133mgydv0jxg", "priority": "HIGH", "status": "TODO", "title": "T2", "updatedAt": 2026-05-03T14:32:03.218Z, "workspaceId": "cmopvd3th000h133mmyu7g5qq"}, {"assignee": null, "assigneeId": null, "createdAt": 2026-05-03T14:32:01.691Z, "description": null, "dueDate": null, "goal": null, "goalId": null, "id": "cmopvd50a000l133mq2up0ysi", "priority": "LOW", "status": "TODO", "title": "T1", "updatedAt": 2026-05-03T14:32:01.691Z, "workspaceId": "cmopvd3th000h133mmyu7g5qq"}]
+
+      42 |
+      43 |       let items = await actionItemService.listActionItems(workspace.id, { status: 'TODO' });
+    > 44 |       expect(items).toHaveLength(1);
+         |                     ^
+      45 |       expect(items[0].title).toBe('T1');
+      46 |
+      47 |       items = await actionItemService.listActionItems(workspace.id, { priority: 'HIGH' });
+
+      at Object.<anonymous> (src/__tests__/services/actionItem.service.test.js:44:21)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 9 passed, 10 total
+Snapshots:   0 total
+Time:        62.063 s
+Ran all test suites matching src/__tests__/services/actionItem.service.test.js.
+npm error Lifecycle script `test` failed with error:
+npm error code 1
+npm error path /home/zishan/assessment/apps/api
+npm error workspace api@1.0.0
+npm error location /home/zishan/assessment/apps/api
+npm error command failed
+npm error command sh -c NODE_OPTIONS='--experimental-vm-modules' NODE_ENV=test jest src/__tests__/services/actionItem.service.test.js

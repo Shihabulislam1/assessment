@@ -1,237 +1,141 @@
-# FredoCloud — Goal & Task Management Platform
+# FredoCloud — Collaborative Team Hub
 
-> Real-time productivity hub with visual goal tracking, intelligent prioritization, and automated analytics.
+> A high-performance goal and task management platform built for modern teams. Features real-time synchronization, visual analytics, and granular security auditing.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16.2.4-black)
 ![Express.js](https://img.shields.io/badge/Express.js-5.0.0-blue)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-blue)
-![Redis](https://img.shields.io/badge/Redis-7.4.0-red)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1.17-purple)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0-purple)
 ![Socket.IO](https://img.shields.io/badge/Socket.IO-4.8.1-yellow)
 
 ---
 
 ## 🎯 Project Overview
 
-**FredoCloud** is a comprehensive goal and task management platform designed to help individuals and teams achieve their objectives through visual tracking, intelligent prioritization, and seamless collaboration. The platform combines a modern, responsive web interface with a powerful, real-time backend to deliver an exceptional productivity experience.
+**FredoCloud** is a comprehensive workspace for teams to align on strategic objectives and execute daily tasks. It combines the clarity of goal tracking with the velocity of Kanban task management, all synchronized in real-time across your team.
 
 ---
 
 ## ✨ Key Features
 
-### ✅ Visual Goal Management
-- **Hierarchical Goal Structure**: Organize goals into parent-child relationships for better clarity
-- **Visual Goal Cards**: Interactive cards showing progress, status, and deadlines
-- **Milestone Tracking**: Break down goals into manageable milestones with individual tracking
-- **Progress Visualization**: Real-time progress bars and completion percentages
+### ✅ Strategic Goal Management
+- **Milestone Tracking**: Break down large objectives into measurable progress steps.
+- **Activity Timelines**: Rich-text activity feeds for every goal with @mention support.
+- **Visual Progress**: Real-time progress bars and status indicators.
 
-### ✅ Intelligent Task Management
-- **Smart Categorization**: Automatically categorize tasks using AI-powered natural language understanding
-- **Priority Prediction**: AI suggests optimal priority levels based on task characteristics
-- **Due Date Prediction**: Predicts realistic due dates using historical data
-- **Smart Sorting**: Automatically sorts tasks by importance, urgency, and effort
+### ✅ Agile Task Management
+- **Kanban & List Views**: Switch between flexible Kanban boards and structured lists.
+- **Smart Prioritization**: Categorize tasks by urgency and importance (Low, Medium, High, Urgent).
+- **Assignee Management**: Clear ownership for every action item.
 
-### ✅ Real-time Collaboration
-- **Live Updates**: Instant synchronization of goal and task changes across all devices
-- **Real-time Notifications**: Instant alerts for updates, mentions, and task completions
-- **Online Presence**: See who's online and working on what in real-time
-- **Team Dashboards**: Collaborative workspaces for team goal tracking
+### ✅ Team Collaboration
+- **Real-time Sync**: Instant updates across all clients via Socket.IO.
+- **Online Presence**: See which team members are currently active in the workspace.
+- **Notification System**: In-app alerts for mentions, assignments, and status changes.
 
-### ✅ Advanced Analytics
-- **AI-Powered Insights**: Natural language explanations of trends and patterns
-- **Visual Analytics**: Comprehensive charts and graphs powered by Recharts
-- **Completion Analytics**: Track goal completion rates over time
-- **Progress Analytics**: Monitor individual and team progress
-- **Audit Trails**: Complete audit logs for all changes with detailed change tracking
-- **Data Export**: Export workspace data and audit logs to CSV format
-
-### ✅ User Experience
-- **Dark Mode**: Built-in dark mode support with automatic theme switching
-- **Responsive Design**: Seamless experience across desktop, tablet, and mobile devices
-- **Keyboard Shortcuts**: Enhanced keyboard navigation for power users
-- **Accessibility**: ARIA labels and keyboard navigation support
-- **User Onboarding**: Step-by-step guided setup for new users
-
-### ✅ Productivity Tools
-- **Quick Capture**: Instant task creation with natural language input
-- **Smart Reminders**: Context-aware notifications and reminders
-- **Time Tracking**: Track time spent on tasks and goals
-- **Streak Tracking**: Visual streaks for consecutive days of productivity
-
-### ✅ Workspace Management
-- **Multi-Workspace Support**: Manage multiple workspaces independently
-- **Member Management**: Add, remove, and manage workspace members
-- **Role-Based Access**: Role-based permissions for workspace members
-- **Workspace Analytics**: Track workspace-wide productivity metrics
-- **Settings Management**: Configure workspace-specific settings
+### ✅ Advanced Analytics & Security
+- **Visual Dashboards**: Goal completion trends and task distribution charts powered by Recharts.
+- **Immutable Audit Log**: A tamper-proof record of every administrative action and data change.
+- **Data Portability**: Export workspace data and security logs to CSV format.
+- **RBAC**: Robust Role-Based Access Control (Admin vs. Member permissions).
 
 ---
 
 ## 🏗️ Architecture
 
-### Monorepo Structure
-
-The project follows a **Turborepo monorepo** architecture for optimal code sharing and development efficiency:
-
+### Monorepo Structure (Turborepo)
 ```
 fredocloud/
 ├── apps/
-│   ├── web/        # Next.js frontend (React)
-│   └── api/        # Express.js backend (Node.js)
+│   ├── web/        # Next.js frontend (App Router)
+│   └── api/        # Express.js REST API & Socket.IO
 ├── packages/
-│   └── shared/      # Shared code (constants, validators)
-├── README.md
-├── package.json
-└── turbo.json
+│   └── shared/     # Shared constants and utilities
+└── prisma/         # Database schema and migrations
 ```
 
 ### Technical Stack
-
-- **Frontend**: Next.js 16 with App Router, React 19, Tailwind CSS 4, Recharts
-- **Backend**: Express.js 5 with Socket.IO
-- **Database**: PostgreSQL (hosted on Railway)
-- **Cache**: Redis (hosted on Railway)
-- **Real-time**: Socket.IO
-- **File Storage**: Cloudinary
-- **Deployment**: Vercel (frontend), Railway (backend)
+- **Frontend**: Next.js 16, React 19, Tailwind CSS 4, Shadcn/UI, Zustand, Recharts.
+- **Backend**: Node.js, Express.js 5, Socket.IO 4, Prisma ORM.
+- **Database**: PostgreSQL.
+- **Real-time**: Bidirectional WebSockets for live state synchronization.
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-
 - **Node.js**: v20.x or higher
-- **PostgreSQL**: v15 or higher (via Railway)
-- **Redis**: v7 or higher (via Railway)
-- **npm** v10+
+- **PostgreSQL**: v15 or higher
+- **npm**: v10+
 
 ### Installation
 
-1. **Clone the repository**
-```bash
-git clone <repository-url>
-cd fredocloud
-```
+1. **Clone & Install**
+   ```bash
+   git clone <repository-url>
+   cd fredocloud
+   npm install
+   ```
 
-2. **Install dependencies**
-```bash
-npm install
-```
+2. **Configure Environment**
+   Create `apps/api/.env`:
+   ```env
+   PORT=5000
+   DATABASE_URL=postgresql://user:pass@localhost:5432/fredocloud
+   JWT_PRIVATE_KEY="your-rs256-private-key"
+   JWT_PUBLIC_KEY="your-rs256-public-key"
+   CLIENT_URL=http://localhost:3000
+   CLOUDINARY_CLOUD_NAME=your-name
+   CLOUDINARY_API_KEY=your-key
+   CLOUDINARY_API_SECRET=your-secret
+   ```
 
-3. **Configure environment variables**
+   Create `apps/web/.env.local`:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:5000
+   NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
+   ```
 
-Create `apps/api/.env` with:
-```
-PORT=5000
-NODE_ENV=development
-DATABASE_URL=postgresql://postgres:password@localhost:5432/fredocloud
-JWT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
-JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----"
-JWT_ISSUER=fredocloud
-JWT_AUDIENCE=fredocloud-api
-CSRF_COOKIE_DOMAIN=.yourdomain.com
-CSRF_COOKIE_SAMESITE=lax
-CSRF_COOKIE_SECURE=true
-CSRF_TOKEN_LENGTH=64
-# REQUIRED — must be an even integer >= 32. All instances must share the same value.
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-CLIENT_URL=http://localhost:3000
-```
+3. **Initialize Database**
+   ```bash
+   npx turbo run db:generate
+   npx turbo run db:migrate:dev
+   npx turbo run db:seed
+   ```
 
-Create `apps/web/.env.local` with:
-```
-NEXT_PUBLIC_API_URL=http://localhost:5000
-NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
-```
-
-4. **Start development servers**
-```bash
-npm run dev
-```
-
-This starts both the Next.js frontend (http://localhost:3000) and Express.js API (http://localhost:5000).
+4. **Start Development**
+   ```bash
+   npm run dev
+   ```
 
 ---
 
-## 📂 Project Structure
+## 🔒 Security Features
 
-```
-apps/
-├── web/                 # Next.js frontend
-│   ├── src/
-│   │   └── app/        # Next.js App Router pages
-│   ├── public/         # Static assets
-│   ├── next.config.mjs # Next.js configuration
-│   └── turbo.json      # Turborepo config
-│
-├── api/                 # Express.js backend
-│   ├── src/
-│   │   ├── routes/     # Express routes
-│   │   ├── middleware/  # Express middleware
-│   │   ├── controllers/# Request handlers
-│   │   ├── services/   # Business logic
-│   │   ├── utils/      # Utilities
-│   │   ├── config/     # Configuration
-│   │   └── socket/     # Socket.IO setup
-│   ├── prisma/         # Database schema (Phase 2)
-│   ├── package.json
-│   └── turbo.json      # Turborepo config
-│
-packages/
-└── shared/              # Shared code
-    ├── src/
-    │   └── constants.js # Shared constants
-    └── package.json
-```
+### Audit Log & RBAC
+FredoCloud implements an **Immutable Audit Log** system. Every action (Create, Update, Delete) on Goals, Tasks, and Workspace settings is recorded with:
+- Timestamp
+- Performing User
+- Entity affected
+- Detailed JSON change diff
+
+**Permissions:**
+- **Admins**: Manage workspace settings, members, and delete any content.
+- **Members**: Create and update goals/tasks, but cannot delete workspace-level data.
 
 ---
 
-## 🔄 Real-time Sync
+## 🔑 Demo Credentials
 
-Socket.IO enables real-time bidirectional communication between the frontend and backend. The socket server is initialized alongside the Express HTTP server and handles:
-- Real-time notifications
-- Live updates for goals and tasks
-- Online presence tracking
-
----
-
-## 🔒 Authentication
-
-JWT-based authentication with RS256 algorithm. Keys are configured via environment variables:
-- `JWT_PRIVATE_KEY` - For signing tokens
-- `JWT_PUBLIC_KEY` - For verifying tokens
+Access the pre-seeded demo account:
+- **Email**: `demo@fredocloud.com`
+- **Password**: `Password123!`
 
 ---
 
 ## 📡 Deployment
 
-### Frontend (Vercel)
-- Connects to API via `NEXT_PUBLIC_API_URL` environment variable
-- API proxy configured in `next.config.mjs`
+FredoCloud is designed to be deployed as two separate services (Frontend and Backend) with a shared PostgreSQL database.
 
-### Backend (Railway)
-- PostgreSQL database provisioned via Railway
-- Redis cache provisioned via Railway
-- Environment variables injected at deploy time
-
----
-
-## 🧪 Testing
-
-```bash
-npm run lint     # Lint all packages
-npm run build    # Build all packages
-```
-
----
-
-## 🧩 Phases
-
-- **Phase 1**: Monorepo foundation, Next.js frontend, Express backend, Socket.IO
-- **Phase 2**: Prisma schema, PostgreSQL, Redis (planned)
-- **Phase 3**: Authentication & authorization (planned)
-- **Phase 4**: Goal & task management UI (planned)
-- **Phase 5**: Analytics & reporting (planned)
+**Recommended:** [Railway](https://railway.app) for Backend/DB and [Vercel](https://vercel.com) or Railway for Frontend.

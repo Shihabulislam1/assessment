@@ -41,12 +41,25 @@ export default function AuditLogPage() {
     if (workspaceId) fetchLogs(1, filter);
   }, [workspaceId, filter]);
 
-  const handleExport = () => {
-    const params = new URLSearchParams({
-      entity: filter.entity === 'all' ? '' : filter.entity,
-      action: filter.action === 'all' ? '' : filter.action
-    }).toString();
-    window.open(`${process.env.NEXT_PUBLIC_API_URL}/api/workspaces/${workspaceId}/audit-log/export?${params}`, '_blank');
+  const handleExport = async () => {
+    try {
+      const params = new URLSearchParams({
+        entity: filter.entity === 'all' ? '' : filter.entity,
+        action: filter.action === 'all' ? '' : filter.action
+      }).toString();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/workspaces/${workspaceId}/audit-log/export?${params}`, {
+        credentials: 'include',
+      });
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.href = url;
+      link.download = `audit-log-${workspaceId}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Audit log export failed:', err);
+    }
   };
 
   return (

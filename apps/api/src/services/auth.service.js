@@ -36,13 +36,12 @@ export const generateAccessToken = (user) => {
 };
 
 export const generateRefreshToken = (user) => {
-  const jti = crypto.randomBytes(16).toString('hex');
   const token = jwt.sign(
-    { sub: user.id, jti },
+    { sub: user.id },
     JWT_PRIVATE_KEY,
     { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE }
   );
-  return { token, jti };
+  return { token };
 };
 
 export const hashToken = (token) => {

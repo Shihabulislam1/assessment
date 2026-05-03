@@ -110,7 +110,38 @@ export const useAnnouncementStore = create((set) => ({
     });
     socket.on('comment:created', ({ announcementId, comment }) => {
       set((state) => {
-        const updateAnnouncement = (a) => a.id === announcementId ? { ...a, comments: [...(a.comments || []), comment] } : a;
+        const updateAnnouncement = (a) => a.id === announcementId ? { 
+          ...a, 
+          comments: [...(a.comments || []), comment],
+          _count: { ...a._count, comments: (a._count?.comments || 0) + 1 }
+        } : a;
+        return {
+          announcements: state.announcements.map(updateAnnouncement),
+          currentAnnouncement: state.currentAnnouncement?.id === announcementId ? updateAnnouncement(state.currentAnnouncement) : state.currentAnnouncement,
+        };
+      });
+    });
+    socket.on('reaction:toggled', ({ announcementId, emoji, removed, id, user, ...rest }) => {
+      set((state) => {
+        const updateAnnouncement = (a) => {
+          if (a.id !== announcementId) return a;
+          const currentReactionsCount = a._count?.reactions || 0;
+          let newReactions = a.reactions ? [...a.reactions] : [];
+          
+          if (removed) {
+            newReactions = newReactions.filter(r => r.id !== id);
+          } else {
+            // Reaction added
+            newReactions.push({ id, emoji, user, ...rest });
+          }
+
+          return {
+            ...a,
+            reactions: newReactions,
+            _count: { ...a._count, reactions: currentReactionsCount + (removed ? -1 : 1) }
+          };
+        };
+
         return {
           announcements: state.announcements.map(updateAnnouncement),
           currentAnnouncement: state.currentAnnouncement?.id === announcementId ? updateAnnouncement(state.currentAnnouncement) : state.currentAnnouncement,
@@ -124,5 +155,6 @@ export const useAnnouncementStore = create((set) => ({
     socket.off('announcement:updated');
     socket.off('announcement:deleted');
     socket.off('comment:created');
+    socket.off('reaction:toggled');
   },
 }));

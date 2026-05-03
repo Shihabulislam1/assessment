@@ -14,8 +14,9 @@ export const useAuthStore = create((set) => ({
         body: JSON.stringify({ email, password }),
       });
       set({ user: data.user, isLoading: false });
-    } finally {
+    } catch (err) {
       set({ isLoading: false });
+      throw err;
     }
   },
 
@@ -27,8 +28,9 @@ export const useAuthStore = create((set) => ({
         body: JSON.stringify({ email, password, name }),
       });
       set({ user: data.user, isLoading: false });
-    } finally {
+    } catch (err) {
       set({ isLoading: false });
+      throw err;
     }
   },
 
