@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import * as cookie from 'cookie';
 import corsConfig from '../config/cors.js';
+import prisma from '../config/db.js';
 
 let io;
 const onlineUsers = new Map(); // workspaceId -> Map(userId -> Set(socketId))
@@ -55,25 +56,42 @@ export const initSocket = (httpServer) => {
     console.log(`User ${userId} connected via socket ${socket.id}`);
     socket.join(`user:${userId}`);
 
-    socket.on('join-workspace', (workspaceId) => {
-      socket.join(`workspace:${workspaceId}`);
-      
-      // Update presence
-      if (!onlineUsers.has(workspaceId)) {
-        onlineUsers.set(workspaceId, new Map());
+    socket.on('join-workspace', async (workspaceId) => {
+      try {
+        // Authorization: verify the user is a member of this workspace
+        const membership = await prisma.workspaceMember.findUnique({
+          where: { userId_workspaceId: { userId, workspaceId } },
+          select: { userId: true },
+        });
+
+        if (!membership) {
+          socket.emit('workspace:error', { workspaceId, message: 'Not authorized to join this workspace' });
+          console.warn(`Unauthorized join-workspace attempt: user=${userId} workspace=${workspaceId}`);
+          return;
+        }
+
+        socket.join(`workspace:${workspaceId}`);
+        
+        // Update presence
+        if (!onlineUsers.has(workspaceId)) {
+          onlineUsers.set(workspaceId, new Map());
+        }
+        
+        const workspaceMap = onlineUsers.get(workspaceId);
+        if (!workspaceMap.has(userId)) {
+          workspaceMap.set(userId, new Set());
+        }
+        
+        workspaceMap.get(userId).add(socket.id);
+        
+        // Notify others in workspace
+        io.to(`workspace:${workspaceId}`).emit('online-users', Array.from(workspaceMap.keys()));
+        
+        console.log(`User ${userId} joined workspace ${workspaceId} (Socket: ${socket.id})`);
+      } catch (err) {
+        console.error(`Error in join-workspace handler: ${err.message}`);
+        socket.emit('workspace:error', { workspaceId, message: 'Internal server error' });
       }
-      
-      const workspaceMap = onlineUsers.get(workspaceId);
-      if (!workspaceMap.has(userId)) {
-        workspaceMap.set(userId, new Set());
-      }
-      
-      workspaceMap.get(userId).add(socket.id);
-      
-      // Notify others in workspace
-      io.to(`workspace:${workspaceId}`).emit('online-users', Array.from(workspaceMap.keys()));
-      
-      console.log(`User ${userId} joined workspace ${workspaceId} (Socket: ${socket.id})`);
     });
 
     socket.on('leave-workspace', (workspaceId) => {

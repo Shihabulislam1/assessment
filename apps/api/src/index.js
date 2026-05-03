@@ -39,6 +39,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(morgan('dev'));
 
+app.use('/api/', apiLimiter);
 app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/refresh', refreshLimiter);
@@ -51,7 +52,6 @@ app.use('/api/workspaces/:workspaceId/audit-log', auditRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/workspaces/:workspaceId/analytics', analyticsRoutes);
-app.use('/api/', apiLimiter);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });

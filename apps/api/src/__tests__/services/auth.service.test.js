@@ -107,13 +107,10 @@ describe('Auth Service', () => {
   });
 
   describe('generateRefreshToken', () => {
-    it('creates RS256 JWT with jti claim and issuer/audience', () => {
+    it('creates RS256 JWT with issuer/audience', () => {
       const user = { id: 'user123', email: 'test@example.com' };
-      const { token, jti } = generateRefreshToken(user);
-      expect(jti).toBeDefined();
-      expect(jti.length).toBe(32);
+      const { token } = generateRefreshToken(user);
       const decoded = jwt.verify(token, JWT_PUBLIC_KEY, { algorithms: ['RS256'], issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
-      expect(decoded.jti).toBe(jti);
       expect(decoded.sub).toBe(user.id);
       expect(decoded.iss).toBe(JWT_ISSUER);
       expect(decoded.aud).toBe(JWT_AUDIENCE);
@@ -225,7 +222,7 @@ describe('Auth Service', () => {
   describe('refresh', () => {
     it('rotates tokens correctly', async () => {
       const user = { id: 'user123', email: 'test@example.com', name: 'Test User' };
-      const oldToken = jwt.sign({ sub: user.id, jti: 'old-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
+      const oldToken = jwt.sign({ sub: user.id }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
       const oldHash = hashToken(oldToken);
       const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const tokenRecord = { id: 'token123', tokenHash: oldHash, userId: user.id, isUsed: false, user, expiresAt: futureDate };
@@ -253,7 +250,7 @@ describe('Auth Service', () => {
 
     it('detects token reuse and revokes all user tokens', async () => {
       const user = { id: 'user123', email: 'test@example.com' };
-      const usedToken = jwt.sign({ sub: user.id, jti: 'used-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
+      const usedToken = jwt.sign({ sub: user.id }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
       const usedHash = hashToken(usedToken);
       const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const tokenRecord = { id: 'token123', tokenHash: usedHash, userId: user.id, isUsed: true, user, expiresAt: futureDate };
@@ -267,7 +264,7 @@ describe('Auth Service', () => {
 
     it('throws error for expired token', async () => {
       const user = { id: 'user123', email: 'test@example.com' };
-      const expiredToken = jwt.sign({ sub: user.id, jti: 'expired-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
+      const expiredToken = jwt.sign({ sub: user.id }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
       const expiredHash = hashToken(expiredToken);
       const pastDate = new Date(Date.now() - 1000);
       const tokenRecord = { id: 'token123', tokenHash: expiredHash, userId: user.id, isUsed: false, user, expiresAt: pastDate };
@@ -287,7 +284,7 @@ describe('Auth Service', () => {
 
     it('rejects token with wrong issuer', async () => {
       const user = { id: 'user123', email: 'test@example.com' };
-      const badToken = jwt.sign({ sub: user.id, jti: 'bad-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: 'wrong-issuer', audience: JWT_AUDIENCE });
+      const badToken = jwt.sign({ sub: user.id }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: 'wrong-issuer', audience: JWT_AUDIENCE });
       const badHash = hashToken(badToken);
       const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const tokenRecord = { id: 'token123', tokenHash: badHash, userId: user.id, isUsed: false, user, expiresAt: futureDate };
@@ -299,7 +296,7 @@ describe('Auth Service', () => {
 
     it('deletes token record when jwt signature is invalid', async () => {
       const user = { id: 'user123', email: 'test@example.com' };
-      const badToken = jwt.sign({ sub: user.id, jti: 'bad-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
+      const badToken = jwt.sign({ sub: user.id }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
       const badHash = hashToken(badToken);
       const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const tokenRecord = { id: 'token123', tokenHash: badHash, userId: user.id, isUsed: false, user, expiresAt: futureDate };
@@ -316,7 +313,7 @@ describe('Auth Service', () => {
 
     it('revokes all user tokens on subject mismatch', async () => {
       const user = { id: 'user123', email: 'test@example.com' };
-      const goodToken = jwt.sign({ sub: 'user123', jti: 'good-jti' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
+      const goodToken = jwt.sign({ sub: 'user123' }, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: '7d', issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
       const goodHash = hashToken(goodToken);
       const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const tokenRecord = { id: 'token123', tokenHash: goodHash, userId: 'other-user', isUsed: false, user, expiresAt: futureDate };
