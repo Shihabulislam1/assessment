@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { apiFetch } from '@/lib/api';
+import { AvatarUpload } from './AvatarUpload';
+import { WorkspaceImageUpload } from './WorkspaceImageUpload';
 
 export const GeneralSettingsForm = ({ workspaceId, initialData, onUpdate }) => {
   const [form, setForm] = useState({
@@ -56,7 +58,15 @@ export const GeneralSettingsForm = ({ workspaceId, initialData, onUpdate }) => {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-8">
+        <div className="flex flex-col md:flex-row gap-8 items-start pb-6 border-b border-muted-foreground/5">
+          <AvatarUpload />
+          <div className="flex-1 space-y-1">
+            <h3 className="font-bold">Your Profile</h3>
+            <p className="text-sm text-muted-foreground">This is your personal avatar shown across all workspaces.</p>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label className="text-sm font-semibold ml-1">Workspace Name</label>
@@ -82,8 +92,15 @@ export const GeneralSettingsForm = ({ workspaceId, initialData, onUpdate }) => {
           <div className="space-y-4">
             <div className="flex items-center gap-3 text-sm font-semibold ml-1">
               <Palette className="size-4 text-primary" />
-              <span>Visual Identity</span>
+              <span>Workspace Identity</span>
             </div>
+            
+            <WorkspaceImageUpload 
+              workspaceId={workspaceId} 
+              currentImageUrl={initialData?.imageUrl} 
+              onUpdate={onUpdate}
+            />
+
             <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30 border border-muted-foreground/5">
               <input
                 type="color"

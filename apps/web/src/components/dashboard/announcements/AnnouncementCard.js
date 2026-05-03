@@ -39,8 +39,20 @@ export function AnnouncementCard({ announcement, isAdmin, onDelete }) {
         <CardTitle className="mt-4">{announcement.title}</CardTitle>
       </CardHeader>
       <CardContent className="pb-4">
-        <div className="text-sm prose dark:prose-invert max-w-none text-foreground/90" dangerouslySetInnerHTML={{ __html: announcement.content }} />
+        <div className="text-sm rich-text-content" dangerouslySetInnerHTML={{ __html: announcement.content }} />
       </CardContent>
+      <style jsx global>{`
+        .rich-text-content h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .rich-text-content h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .rich-text-content h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .rich-text-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+        .rich-text-content ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+        .rich-text-content blockquote { border-left: 4px solid hsl(var(--primary)); padding-left: 1rem; font-style: italic; margin-bottom: 1rem; }
+        .rich-text-content pre { background-color: hsl(var(--muted)); padding: 1rem; rounded-lg: 0.5rem; overflow-x: auto; margin-bottom: 1rem; font-family: monospace; }
+        .rich-text-content p { margin-bottom: 0.5rem; }
+        .rich-text-content a { color: hsl(var(--primary)); text-decoration: underline; }
+        .rich-text-content img { max-width: 100%; height: auto; border-radius: 0.5rem; }
+      `}</style>
       <Separator />
       <CardFooter className="py-3 flex items-center gap-4 text-muted-foreground">
         <div className="flex items-center gap-1 text-xs">

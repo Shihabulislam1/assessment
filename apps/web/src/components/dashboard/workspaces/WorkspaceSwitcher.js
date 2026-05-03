@@ -35,8 +35,12 @@ export function WorkspaceSwitcher() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="flex items-center gap-4 w-full p-2.5 rounded-xl hover:bg-accent transition-all text-left outline-none group border border-transparent hover:border-border/40 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:size-12">
-            <div className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 shrink-0 transition-transform group-hover:scale-105 group-data-[collapsible=icon]:size-12">
-              <Layout className="size-6" />
+            <div className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 shrink-0 transition-transform group-hover:scale-105 group-data-[collapsible=icon]:size-12 overflow-hidden">
+              {currentWorkspace?.imageUrl ? (
+                <img src={currentWorkspace.imageUrl} alt={currentWorkspace.name} className="w-full h-full object-cover" />
+              ) : (
+                <Layout className="size-6" />
+              )}
             </div>
             <div className="flex flex-col gap-0.5 flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
               <span className="font-heading font-bold text-base truncate leading-tight">
@@ -69,10 +73,14 @@ export function WorkspaceSwitcher() {
                   )}
                 >
                   <div className="flex items-center gap-3">
-                    <div 
-                      className="size-2 rounded-full" 
-                      style={{ backgroundColor: ws.accentColor || '#6366f1' }} 
-                    />
+                    {ws.imageUrl ? (
+                      <img src={ws.imageUrl} alt={ws.name} className="size-6 rounded-md object-cover border border-muted-foreground/10" />
+                    ) : (
+                      <div 
+                        className="size-2 rounded-full" 
+                        style={{ backgroundColor: ws.accentColor || '#6366f1' }} 
+                      />
+                    )}
                     <span className="truncate max-w-[140px]">{ws.name}</span>
                   </div>
                   {ws.id === workspaceId && <Check className="size-4" />}

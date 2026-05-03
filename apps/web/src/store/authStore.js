@@ -45,4 +45,7 @@ export const useAuthStore = create((set) => ({
       set({ user: null, isLoading: false, initialized: true });
     }
   },
+  setUser: (userData) => set((state) => ({ 
+    user: state.user ? { ...state.user, ...userData } : userData 
+  })),
 }));

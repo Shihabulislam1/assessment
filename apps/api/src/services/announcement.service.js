@@ -2,10 +2,16 @@ import sanitizeHtml from 'sanitize-html';
 import prisma from '../config/db.js';
 import { createAuditLog } from './audit.service.js';
 import { NotFound } from '../utils/AppError.js';
+import { extractMentions } from '../utils/mentions.js';
+import * as notificationService from './notification.service.js';
 
 const sanitize = (html) => sanitizeHtml(html, {
-  allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
-  allowedAttributes: { ...sanitizeHtml.defaults.allowedAttributes, img: ['src', 'alt'] },
+  allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'span']),
+  allowedAttributes: { 
+    ...sanitizeHtml.defaults.allowedAttributes, 
+    img: ['src', 'alt'],
+    span: ['class', 'data-id', 'data-value', 'data-denotation-char', 'data-index']
+  },
 });
 
 export const createAnnouncement = async (workspaceId, userId, data) => {
@@ -24,6 +30,28 @@ export const createAnnouncement = async (workspaceId, userId, data) => {
     action: 'CREATE', entity: 'Announcement', entityId: announcement.id,
     changes: { title: data.title }, userId, workspaceId,
   });
+
+  // Handle mentions
+  const mentionedNames = extractMentions(data.content);
+  if (mentionedNames.length > 0) {
+    const usersToNotify = await prisma.user.findMany({
+      where: { 
+        name: { in: mentionedNames, mode: 'insensitive' },
+        memberships: { some: { workspaceId } } // Ensure they are in the workspace
+      },
+      select: { id: true }
+    });
+    
+    for (const targetUser of usersToNotify) {
+      if (targetUser.id === userId) continue;
+      await notificationService.createNotification({
+        type: 'MENTION',
+        content: `${announcement.author.name} mentioned you in an announcement: ${announcement.title}`,
+        userId: targetUser.id,
+        linkUrl: `/workspace/${workspaceId}/announcements`
+      });
+    }
+  }
 
   return announcement;
 };
@@ -98,6 +126,28 @@ export const createComment = async (workspaceId, announcementId, userId, data) =
     action: 'CREATE', entity: 'Comment', entityId: comment.id,
     changes: { announcementId }, userId, workspaceId,
   });
+
+  // Handle mentions in comments
+  const mentionedNames = extractMentions(data.content);
+  if (mentionedNames.length > 0) {
+    const usersToNotify = await prisma.user.findMany({
+      where: { 
+        name: { in: mentionedNames, mode: 'insensitive' },
+        memberships: { some: { workspaceId } }
+      },
+      select: { id: true }
+    });
+    
+    for (const targetUser of usersToNotify) {
+      if (targetUser.id === userId) continue;
+      await notificationService.createNotification({
+        type: 'MENTION',
+        content: `${comment.author.name} mentioned you in a comment on: ${announcement.title}`,
+        userId: targetUser.id,
+        linkUrl: `/workspace/${workspaceId}/announcements`
+      });
+    }
+  }
 
   return comment;
 };
